@@ -2,6 +2,9 @@ package Analizadores;
 
 import java_cup.runtime.*;
 import java.util.*;
+import Conjuntos.ConjuntoManager;
+import Arbol.ArbolBuilder;
+import Arbol.SimplificadorOperaciones;
 
 class MiParser;
 
