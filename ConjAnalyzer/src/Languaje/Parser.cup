@@ -1,0 +1,187 @@
+package Analizadores;
+
+import java_cup.runtime.*;
+import java.util.*;
+
+class MiParser;
+
+parser code {:
+    private int errorCount = 0;
+
+    ConjuntoManager conjuntoManager = new ConjuntoManager();
+    SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
+    ArbolBuilder arbolBuilder = new ArbolBuilder(conjuntoManager);  // Crear el ArbolBuilder aquí
+
+    public void syntax_error(Symbol s) {
+        System.err.println("Syntax Error in Line " + s.left + " Column " + s.right + ". Unexpected: " + s.value);
+        errorCount++;
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        Symbol s = (Symbol) info;
+        throw new RuntimeException("Fatal Error: " + message + " at line " + s.left + ", column " + s.right);
+    }
+
+    public int getErrorCount() {
+        return errorCount;
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws Exception {
+        System.err.println("Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value);
+        throw new Exception("Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value);
+    }
+
+    public Set<Character> obtenerConjunto(String nombre) {
+        Set<Character> conjunto = conjuntoManager.obtenerConjunto(nombre);
+        if (conjunto == null) {
+            throw new RuntimeException("El conjunto " + nombre + " no está definido.");
+        }
+        return conjunto;
+    }
+:}
+
+// Terminales
+terminal LLAVE_IZQ, LLAVE_DER, DOSPUNTOS, FLECHA, PUNTOYCOMA, 
+         UNION, INTERSECCION, DIFERENCIA, COMPLEMENTO, 
+         PAR_IZQ, PAR_DER, COMA, HASTA;
+terminal String ID, CONJUNTO;
+
+// Terminales para palabras reservadas
+terminal CONJ, OPERA, EVALUAR;
+
+non terminal Programa;
+non terminal Sentencias;
+non terminal Sentencia;
+non terminal DefinicionConjunto;
+non terminal DefinicionOperacion;
+non terminal List<String> OperacionTokens;  // Cambiar Nodo a List<String>
+non terminal Nodo Operacion;
+non terminal Evaluacion;
+non terminal Set<Character> Conjunto;
+
+// El programa empieza con un bloque delimitado por llaves
+start with Programa;
+
+Programa ::= LLAVE_IZQ:llz Sentencias LLAVE_DER:llr
+    {: 
+        System.out.println("Token: " + llz);
+        System.out.println("Token: " + llr);
+        System.out.println("Regla: Programa ::= LLAVE_IZQ Sentencias LLAVE_DER"); 
+    :};
+
+Sentencias ::= Sentencia Sentencias
+             | /* vacío */ 
+             ;
+
+Sentencia ::= DefinicionConjunto
+            | DefinicionOperacion
+            | Evaluacion
+            ;
+
+// Producción para definir un conjunto
+DefinicionConjunto ::= CONJ:conj DOSPUNTOS:dosp ID:id FLECHA:flecha Conjunto:conjSet PUNTOYCOMA:punto
+    {: 
+        conjuntoManager.definirConjunto(id, conjSet);
+        System.out.println("Definido conjunto: " + id);
+        System.out.println("Conjunto contenido: " + conjSet);
+    :};
+
+// Producción para manejar las diferentes notaciones de conjunto
+Conjunto ::= CONJUNTO:conj1 HASTA:hasta CONJUNTO:conj2
+    {: 
+        RESULT = conjuntoManager.generarConjuntoDesdeRango(conj1, conj2);
+        System.out.println("Generando conjunto desde rango: " + conj1 + " hasta " + conj2);
+        System.out.println("Conjunto generado: " + RESULT);
+    :}
+    | CONJUNTO:conj1 COMA Conjunto:resto
+    {: 
+        Set<Character> conjunto = new HashSet<>();
+        conjunto.add(conj1.charAt(0));  // Añadir el primer elemento
+        conjunto.addAll(resto);  // Añadir el resto de los elementos
+        RESULT = conjunto;
+        System.out.println("Generando conjunto desde lista: " + conj1 + ", " + resto);
+        System.out.println("Conjunto generado: " + RESULT);
+    :}
+    | CONJUNTO:conj1
+    {: 
+        Set<Character> conjunto = new HashSet<>();
+        conjunto.add(conj1.charAt(0));
+        RESULT = conjunto;
+        System.out.println("Generando conjunto desde un solo elemento: " + conj1);
+        System.out.println("Conjunto generado: " + RESULT);
+    :};
+
+// Definición de una operación (construcción del árbol y simplificación)
+DefinicionOperacion ::= OPERA:opera DOSPUNTOS:dosp ID:id FLECHA:flecha OperacionTokens:tokens PUNTOYCOMA:punto
+{:
+    Nodo arbol = arbolBuilder.construirArbol(tokens);
+    Set<Character> resultado = arbol.evaluar();
+    conjuntoManager.guardarOperacion(id, arbol.mostrarContenido(), resultado);
+    System.out.println("Operación '" + id + "' simplificada y guardada.");
+    System.out.println("Árbol de operación simplificada: " + arbol);
+    System.out.println("Resultado de la operación: " + resultado);
+:};
+
+
+// Construcción del árbol de operaciones utilizando notación polaca inversa
+OperacionTokens ::= DIFERENCIA:dif OperacionTokens:op1 OperacionTokens:op2
+{:
+    List<String> tokens = new ArrayList<>(op1);
+    tokens.addAll(op2);
+    tokens.add("-");
+    RESULT = tokens;
+    System.out.println("Token de diferencia añadido: " + tokens);
+:}
+| UNION:union OperacionTokens:op1 OperacionTokens:op2
+{:
+    List<String> tokens = new ArrayList<>(op1);
+    tokens.addAll(op2);
+    tokens.add("U");
+    RESULT = tokens;
+    System.out.println("Token de unión añadido: " + tokens);
+:}
+| INTERSECCION:inter OperacionTokens:op1 OperacionTokens:op2
+{:
+    List<String> tokens = new ArrayList<>(op1);
+    tokens.addAll(op2);
+    tokens.add("&");
+    RESULT = tokens;
+    System.out.println("Token de intersección añadido: " + tokens);
+:}
+| COMPLEMENTO:compl OperacionTokens:op
+{:
+    List<String> tokens = new ArrayList<>(op);
+    tokens.add("^");
+    RESULT = tokens;
+    System.out.println("Token de complemento añadido: " + tokens);
+:}
+| LLAVE_IZQ ID:id LLAVE_DER
+{:
+    List<String> tokens = new ArrayList<>();
+    tokens.add(id);
+    RESULT = tokens;
+    System.out.println("Identificador de conjunto añadido: " + tokens);
+:};
+
+
+// Evaluación de operaciones definidas
+Evaluacion ::= EVALUAR PAR_IZQ LLAVE_IZQ Conjunto:conjSet LLAVE_DER COMA ID:id PAR_DER PUNTOYCOMA:punto
+    {:
+        Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
+
+        if (resultadoOperacion != null) {
+            System.out.println("===============\nEvaluar: " + id + "\n===============");
+            System.out.println("Conjunto a evaluar: " + conjSet);
+            System.out.println("Resultado de la operación '" + id + "': " + resultadoOperacion);
+            for (Character elemento : conjSet) {
+                if (resultadoOperacion.contains(elemento)) {
+                    System.out.println(elemento + " -> exitoso");
+                } else {
+                    System.out.println(elemento + " -> fallo");
+                }
+            }
+        } else {
+            System.err.println("Error: La operación '" + id + "' no está definida.");
+        }
+    :};
+
