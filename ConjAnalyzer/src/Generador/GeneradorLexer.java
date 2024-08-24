@@ -8,25 +8,23 @@ package Generador;
  *
  * @author Keneth Lopez
  */
-public class Generador {
+public class GeneradorLexer {
     public static void main(String[] args) {
         try {
-            // Ruta donde están los archivos de JFlex y CUP
+            // Ruta donde está el archivo de JFlex
             String rutaEspecificaciones = "./src/Language/";
 
             // Ruta donde se generarán los archivos .java
             String rutaAnalizadores = "./src/Analizadores/";
 
-            // 1. Generar el analizador léxico con JFlex
-            String[] opJFlex = {rutaEspecificaciones + "Lexer.jflex", "-d", rutaAnalizadores};
+            // Convertir a rutas absolutas para evitar problemas de rutas relativas
+            String rutaEspecificacionesAbsoluta = new java.io.File(rutaEspecificaciones).getAbsolutePath();
+            String rutaAnalizadoresAbsoluta = new java.io.File(rutaAnalizadores).getAbsolutePath();
+
+            // Generar el analizador léxico con JFlex
+            String[] opJFlex = {rutaEspecificacionesAbsoluta + "/Lexer.jflex", "-d", rutaAnalizadoresAbsoluta};
             jflex.Main.generate(opJFlex);
             System.out.println("Generación de analizador léxico completada.");
-
-            // 2. Generar el analizador sintáctico con CUP
-            String[] opCUP = {"-destdir", rutaAnalizadores, "-parser", "Parser", rutaEspecificaciones + "Parser.cup"};
-            java_cup.Main.main(opCUP);
-            System.out.println("Generación de analizador sintáctico completada.");
-
         } catch (Exception e) {
             e.printStackTrace();
         }
