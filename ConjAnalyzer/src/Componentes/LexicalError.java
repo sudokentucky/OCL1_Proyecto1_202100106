@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Componentes;
+import java.util.List;
 
 /**
  *
@@ -52,5 +53,26 @@ public class LexicalError {
 
     public void setColumna(int columna) {
         this.columna = columna;
+    }
+
+    // Método estático para generar la tabla de errores léxicos en formato HTML
+    public static String generarTablaHTML(List<LexicalError> errores) {
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body>");
+        html.append("<table border='1'>");
+        html.append("<tr><th>Valor</th><th>Mensaje</th><th>Línea</th><th>Columna</th></tr>");
+
+        for (LexicalError error : errores) {
+            html.append("<tr>");
+            html.append("<td>").append(error.getValor()).append("</td>");
+            html.append("<td>").append(error.getMensaje()).append("</td>");
+            html.append("<td>").append(error.getLinea()).append("</td>");
+            html.append("<td>").append(error.getColumna()).append("</td>");
+            html.append("</tr>");
+        }
+
+        html.append("</table>");
+        html.append("</body></html>");
+        return html.toString();
     }
 }
