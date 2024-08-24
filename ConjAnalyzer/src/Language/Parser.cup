@@ -3,10 +3,9 @@ package Analizadores;
 import java_cup.runtime.*;
 import java.util.*;
 import Conjuntos.ConjuntoManager;
-import Arbol.ArbolBuilder;
+import Arbol.*;
 import Arbol.SimplificadorOperaciones;
 
-class MiParser;
 
 parser code {:
     private int errorCount = 0;
@@ -58,7 +57,6 @@ non terminal Sentencia;
 non terminal DefinicionConjunto;
 non terminal DefinicionOperacion;
 non terminal List<String> OperacionTokens;  // Cambiar Nodo a List<String>
-non terminal Nodo Operacion;
 non terminal Evaluacion;
 non terminal Set<Character> Conjunto;
 
