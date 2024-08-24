@@ -10,6 +10,7 @@ import java.util.*;
 import Conjuntos.ConjuntoManager;
 import Arbol.*;
 import Arbol.SimplificadorOperaciones;
+import Componentes.SyntaxError;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
@@ -151,19 +152,24 @@ public class Parser extends java_cup.runtime.lr_parser {
 
 
     private int errorCount = 0;
+    private List<SyntaxError> syntaxErrors = new ArrayList<>(); // Lista para almacenar errores sintácticos
 
     ConjuntoManager conjuntoManager = new ConjuntoManager();
     SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
     ArbolBuilder arbolBuilder = new ArbolBuilder(conjuntoManager);  // Crear el ArbolBuilder aquí
 
     public void syntax_error(Symbol s) {
-        System.err.println("Syntax Error in Line " + s.left + " Column " + s.right + ". Unexpected: " + s.value);
+        String message = "Syntax Error in Line " + s.left + " Column " + s.right + ". Unexpected: " + s.value;
+        System.err.println(message);
         errorCount++;
+        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Syntax Error")); // Agregar a la lista de errores
     }
 
     public void report_fatal_error(String message, Object info) {
         Symbol s = (Symbol) info;
-        throw new RuntimeException("Fatal Error: " + message + " at line " + s.left + ", column " + s.right);
+        message = "Fatal Error: " + message + " at line " + s.left + ", column " + s.right;
+        System.err.println(message);
+        throw new RuntimeException(message);
     }
 
     public int getErrorCount() {
@@ -171,8 +177,10 @@ public class Parser extends java_cup.runtime.lr_parser {
     }
 
     public void unrecovered_syntax_error(Symbol s) throws Exception {
-        System.err.println("Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value);
-        throw new Exception("Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value);
+        String message = "Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value;
+        System.err.println(message);
+        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Unrecovered Syntax Error")); // Agregar a la lista de errores
+        throw new Exception(message);
     }
 
     public Set<Character> obtenerConjunto(String nombre) {
@@ -181,6 +189,11 @@ public class Parser extends java_cup.runtime.lr_parser {
             throw new RuntimeException("El conjunto " + nombre + " no está definido.");
         }
         return conjunto;
+    }
+
+    // Método para obtener la lista de errores sintácticos
+    public List<SyntaxError> getSyntaxErrors() {
+        return syntaxErrors;
     }
 
 
