@@ -83,7 +83,7 @@ COM_MULTI = "<!"([^])*? "!>"
 
 {BLANCOS} {/* Ignorar espacios en blanco */}
 
-{SALTOLINEA} { yyline++; yycolumn = 1; }
+{SALTOLINEA} {  }
 
 {COM_LINEA} | {COM_MULTI} {/* Ignorar comentarios */}
 
