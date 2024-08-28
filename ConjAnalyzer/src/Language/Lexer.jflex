@@ -58,9 +58,8 @@ HASTA = "~"
 LLAVE_IZQ = "{"
 LLAVE_DER = "}"
 
-CONJUNTO_ELEMENTOS = [a-zA-Z0-9](\s*,\s*[a-zA-Z0-9])*
 ID = [a-zA-Z_][a-zA-Z0-9_]* 
-NO_UNIVERSO = [^\x21-\x7E]
+NO_UNIVERSO = [\x00-\x20\x7F-\xFF]
 
 RES_CONJ = "CONJ"
 RES_OPERA = "OPERA"
@@ -72,6 +71,9 @@ COMA = ","
 FLECHA = "->"
 DOSPUNTOS = ":"
 PUNTOYCOMA = ";"
+ASCII = [\x21-\x7E]  // Caracteres ASCII del 33 al 126
+CONJUNTO_ELEMENTOS = {ASCII}(\s*,\s*{ASCII})*
+ELEMENTOS_EVALUAR = \{\s*{ASCII}(\s*,\s*{ASCII})*\s*\}
 
 BLANCOS = [ \t\r]+
 SALTOLINEA = \n
@@ -98,11 +100,6 @@ COM_MULTI = "<!"([^])*? "!>"
 {DIFERENCIA} { addToken("DIFERENCIA", yytext(), yyline, yycolumn); return new Symbol(sym.DIFERENCIA, yyline, yycolumn, yytext()); }
 {COMPLEMENTO} { addToken("COMPLEMENTO", yytext(), yyline, yycolumn); return new Symbol(sym.COMPLEMENTO, yyline, yycolumn, yytext()); }
 {HASTA} { addToken("HASTA", yytext(), yyline, yycolumn); return new Symbol(sym.HASTA, yyline, yycolumn, yytext()); }
-//Conjunto
-{CONJUNTO_ELEMENTOS} {
-    addToken("CONJUNTO", yytext(), yyline, yycolumn); 
-    return new Symbol(sym.CONJUNTO, yyline, yycolumn, yytext());
-}
 {ID} { addToken("ID", yytext(), yyline, yycolumn); return new Symbol(sym.ID, yyline, yycolumn, yytext()); }
 // Símbolos y operadores
 {DOSPUNTOS} { addToken("DOSPUNTOS", yytext(), yyline, yycolumn); return new Symbol(sym.DOSPUNTOS, yyline, yycolumn, yytext()); }
@@ -113,6 +110,17 @@ COM_MULTI = "<!"([^])*? "!>"
 {COMA} { addToken("COMA", yytext(), yyline, yycolumn); return new Symbol(sym.COMA, yyline, yycolumn, yytext()); }
 {FLECHA} { addToken("FLECHA", yytext(), yyline, yycolumn); return new Symbol(sym.FLECHA, yyline, yycolumn, yytext()); }
 {PUNTOYCOMA} { addToken("PUNTOYCOMA", yytext(), yyline, yycolumn); return new Symbol(sym.PUNTOYCOMA, yyline, yycolumn, yytext()); }
+
+{ELEMENTOS_EVALUAR} {
+    addToken("ELEMENTOS_EVALUAR", yytext(), yyline, yycolumn);
+    return new Symbol(sym.ELEMENTOS_EVALUAR, yyline, yycolumn, yytext());
+}
+
+//Conjunto
+{CONJUNTO_ELEMENTOS} {
+    addToken("CONJUNTO", yytext(), yyline, yycolumn); 
+    return new Symbol(sym.CONJUNTO, yyline, yycolumn, yytext());
+}
 
 {NO_UNIVERSO} { addError(yytext(), "Error Léxico", yyline, yycolumn);
     return new Symbol(sym.error, yyline, yycolumn, yytext()); }
