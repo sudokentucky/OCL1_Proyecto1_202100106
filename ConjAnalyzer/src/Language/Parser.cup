@@ -6,44 +6,53 @@ import Conjuntos.ConjuntoManager;
 import Arbol.*;
 import Arbol.SimplificadorOperaciones;
 import Componentes.SyntaxError; // Importar la clase SyntaxError
+import java.util.Stack;
 
 parser code {:
-    private int errorCount = 0;
     private List<SyntaxError> syntaxErrors = new ArrayList<>(); // Lista para almacenar errores sintácticos
 
     ConjuntoManager conjuntoManager = new ConjuntoManager();
     SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
-    ArbolBuilder arbolBuilder = new ArbolBuilder(conjuntoManager);  // Crear el ArbolBuilder aquí
+    ArbolPrefijo arbolPrefijo = new ArbolPrefijo(conjuntoManager);
 
     public void syntax_error(Symbol s) {
-        String message = "Syntax Error in Line " + s.left + " Column " + s.right + ". Unexpected: " + s.value;
+        // Obtener los IDs de los tokens esperados
+        List<Integer> expected = expected_token_ids();
+        StringBuilder expectedTokens = new StringBuilder();
+        for (int id : expected) {
+            expectedTokens.append(symbol_name_from_id(id)).append(" ");
+        }
+
+        // Determinar el token inesperado
+        String unexpectedToken = (s != null && s.value != null) ? s.value.toString() : "Símbolo Desconocido";
+
+        // Construir el comentario con los tokens esperados
+        String comentario = "Se esperaba uno de los siguientes tokens: " + expectedTokens.toString().trim() + ".";
+
+        // Construir el mensaje para la salida de error
+        String message = "Error de Sintaxis en línea " + s.left + ", columna " + s.right + ". " +
+                         "Token inesperado: '" + unexpectedToken + "'. " + comentario;
+
+        // Imprimir el mensaje en la consola de errores
         System.err.println(message);
-        errorCount++;
-        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Syntax Error")); // Agregar a la lista de errores
+
+        // Agregar el error a la lista con el nuevo comentario
+        syntaxErrors.add(new SyntaxError(s.left, s.right, unexpectedToken, comentario));
     }
 
-    public void report_fatal_error(String message, Object info) {
-        Symbol s = (Symbol) info;
-        message = "Fatal Error: " + message + " at line " + s.left + ", column " + s.right;
-        System.err.println(message);
-        throw new RuntimeException(message);
-    }
-
-    public int getErrorCount() {
-        return errorCount;
-    }
-
-    public void unrecovered_syntax_error(Symbol s) throws Exception {
+    public void unrecovered_syntax_error(Symbol s) {
         String message = "Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value;
         System.err.println(message);
-        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Unrecovered Syntax Error")); // Agregar a la lista de errores
-        throw new Exception(message);
+        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Unrecovered Syntax Error")); 
     }
 
     public Set<Character> obtenerConjunto(String nombre) {
         Set<Character> conjunto = conjuntoManager.obtenerConjunto(nombre);
         if (conjunto == null) {
-            throw new RuntimeException("El conjunto " + nombre + " no está definido.");
+            String message = "Error: El conjunto '" + nombre + "' no está definido.";
+            System.err.println(message);
+            syntaxErrors.add(new SyntaxError(0, 0, nombre, "Conjunto No Definido"));
+            return Collections.emptySet(); // Retornar conjunto vacío como medida de recuperación
         }
         return conjunto;
     }
@@ -52,13 +61,85 @@ parser code {:
     public List<SyntaxError> getSyntaxErrors() {
         return syntaxErrors;
     }
+
+    public String symbol_name_from_id(int id) {
+        switch(id) {
+            case sym.PUNTOYCOMA: return "PUNTOYCOMA";
+            case sym.DIFERENCIA: return "DIFERENCIA";
+            case sym.DOSPUNTOS: return "DOSPUNTOS";
+            case sym.CONJUNTO: return "CONJUNTO";
+            case sym.HASTA: return "HASTA";
+            case sym.INTERSECCION: return "INTERSECCION";
+            case sym.FLECHA: return "FLECHA";
+            case sym.OPERA: return "OPERA";
+            case sym.ID: return "ID";
+            case sym.COMA: return "COMA";
+            case sym.EOF: return "EOF";
+            case sym.CONJ: return "CONJ";
+            case sym.PAR_IZQ: return "PAR_IZQ";
+            case sym.UNION: return "UNION";
+            case sym.error: return "error";
+            case sym.PAR_DER: return "PAR_DER";
+            case sym.COMPLEMENTO: return "COMPLEMENTO";
+            case sym.LLAVE_IZQ: return "LLAVE_IZQ";
+            case sym.EVALUAR: return "EVALUAR";
+            case sym.LLAVE_DER: return "LLAVE_DER";
+            case sym.ELEMENTOS_EVALUAR: return "ELEMENTOS_EVALUAR";
+            default: return "Símbolo Desconocido";
+        }
+    }
+
+   // Implementación de validate_expected_symbol para verificar si un ID de símbolo es válido
+    protected boolean validate_expected_symbol(int id) {
+        switch(id) {
+            case sym.PUNTOYCOMA:
+            case sym.DIFERENCIA:
+            case sym.DOSPUNTOS:
+            case sym.CONJUNTO:
+            case sym.HASTA:
+            case sym.INTERSECCION:
+            case sym.FLECHA:
+            case sym.ELEMENTOS_EVALUAR:
+            case sym.OPERA:
+            case sym.ID:
+            case sym.COMA:
+            case sym.EOF:
+            case sym.CONJ:
+            case sym.PAR_IZQ:
+            case sym.UNION:
+            case sym.error:
+            case sym.PAR_DER:
+            case sym.COMPLEMENTO:
+            case sym.LLAVE_IZQ:
+            case sym.EVALUAR:
+            case sym.LLAVE_DER:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Método para obtener los IDs de los tokens esperados
+    public List<Integer> expected_token_ids() {
+        List<Integer> expectedTokens = new LinkedList<>();
+        int state = ((Symbol) stack.peek()).parse_state;
+        short[] actions = action_tab[state];
+
+        for (int i = 0; i < actions.length; i += 2) {
+            if (actions[i] != -1 && validate_expected_symbol(actions[i])) {
+                expectedTokens.add((int) actions[i]);
+            }
+        }
+        return expectedTokens;
+    }
+
 :}
 
 // Terminales
 terminal LLAVE_IZQ, LLAVE_DER, DOSPUNTOS, FLECHA, PUNTOYCOMA, 
          UNION, INTERSECCION, DIFERENCIA, COMPLEMENTO, 
          PAR_IZQ, PAR_DER, COMA, HASTA;
-terminal String ID, CONJUNTO;
+terminal String ID, CONJUNTO, ELEMENTOS_EVALUAR;
 
 // Terminales para palabras reservadas
 terminal CONJ, OPERA, EVALUAR;
@@ -77,10 +158,8 @@ start with Programa;
 
 Programa ::= LLAVE_IZQ:llz Sentencias LLAVE_DER:llr
     {: 
-        System.out.println("Token: " + llz);
-        System.out.println("Token: " + llr);
-        System.out.println("Regla: Programa ::= LLAVE_IZQ Sentencias LLAVE_DER"); 
-    :};
+    :}
+;
 
 Sentencias ::= Sentencia Sentencias
              | /* vacío */ 
@@ -89,7 +168,17 @@ Sentencias ::= Sentencia Sentencias
 Sentencia ::= DefinicionConjunto
             | DefinicionOperacion
             | Evaluacion
+            | Conjunto
+            | error:e PUNTOYCOMA
+              {: 
+                List<Integer> expected = expected_token_ids();
+                StringBuilder expectedTokens = new StringBuilder();
+                for (int id : expected) {
+                    expectedTokens.append(symbol_name_from_id(id)).append(" ");
+                }
+              :}
             ;
+
 
 // Producción para definir un conjunto
 DefinicionConjunto ::= CONJ:conj DOSPUNTOS:dosp ID:id FLECHA:flecha Conjunto:conjSet PUNTOYCOMA:punto
@@ -124,76 +213,114 @@ Conjunto ::= CONJUNTO:conj1 HASTA:hasta CONJUNTO:conj2
         System.out.println("Conjunto generado: " + RESULT);
     :};
 
-// Definición de una operación (construcción del árbol y simplificación)
 DefinicionOperacion ::= OPERA:opera DOSPUNTOS:dosp ID:id FLECHA:flecha OperacionTokens:tokens PUNTOYCOMA:punto
 {:
-    Nodo arbol = arbolBuilder.construirArbol(tokens);
-    Set<Character> resultado = arbol.evaluar();
-    conjuntoManager.guardarOperacion(id, arbol.mostrarContenido(), resultado);
-    System.out.println("Operación '" + id + "' simplificada y guardada.");
-    System.out.println("Árbol de operación simplificada: " + arbol);
-    System.out.println("Resultado de la operación: " + resultado);
+    try {
+        // Crear instancia de ArbolPrefijo con el conjuntoManager
+        ArbolPrefijo arbolBuilder = new ArbolPrefijo(conjuntoManager);
+
+        // Construir el árbol de acuerdo a los tokens prefijos
+        Nodo arbol = arbolBuilder.construirArbol(tokens);
+
+        // Integrar el simplificador
+        SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
+        Nodo arbolSimplificado = simplificador.simplificar(arbol, id);
+
+        Set<Character> resultado = arbolSimplificado.evaluar();
+        conjuntoManager.guardarOperacion(id, arbolSimplificado.mostrarContenido(), resultado);
+
+        System.out.println("Operación '" + id + "' simplificada y guardada.");
+        System.out.println("Árbol de operación simplificada: " + arbolSimplificado);
+        System.out.println("Resultado de la operación: " + resultado);
+
+// Generar archivo JSON con el resultado de la simplificación
+            simplificador.generarJSON("./src/Salidas/operaciones_simplificadas.json");
+            System.out.println("Archivo JSON de operaciones simplificadas generado.");
+
+    } catch (Exception e) {
+        String message = "Error al definir operación '" + id + "': " + e.getMessage();
+        System.err.println(message);
+        syntaxErrors.add(new SyntaxError(operaleft, puntoright, e.getMessage(), "Error en la Definición de Operación"));
+    }
 :};
 
 
-// Construcción del árbol de operaciones utilizando notación polaca inversa
 OperacionTokens ::= DIFERENCIA:dif OperacionTokens:op1 OperacionTokens:op2
 {:
-    List<String> tokens = new ArrayList<>(op1);
-    tokens.addAll(op2);
-    tokens.add("-");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("-");  // Primero se añade el operador para notación prefija
+    tokens.addAll(op1); // Luego el primer operando
+    tokens.addAll(op2); // Luego el segundo operando
     RESULT = tokens;
     System.out.println("Token de diferencia añadido: " + tokens);
 :}
 | UNION:union OperacionTokens:op1 OperacionTokens:op2
 {:
-    List<String> tokens = new ArrayList<>(op1);
-    tokens.addAll(op2);
-    tokens.add("U");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("U");  // Primero el operador
+    tokens.addAll(op1); // Luego el primer operando
+    tokens.addAll(op2); // Luego el segundo operando
     RESULT = tokens;
     System.out.println("Token de unión añadido: " + tokens);
 :}
 | INTERSECCION:inter OperacionTokens:op1 OperacionTokens:op2
 {:
-    List<String> tokens = new ArrayList<>(op1);
-    tokens.addAll(op2);
-    tokens.add("&");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("&");  // Primero el operador
+    tokens.addAll(op1); // Luego el primer operando
+    tokens.addAll(op2); // Luego el segundo operando
     RESULT = tokens;
     System.out.println("Token de intersección añadido: " + tokens);
 :}
 | COMPLEMENTO:compl OperacionTokens:op
 {:
-    List<String> tokens = new ArrayList<>(op);
-    tokens.add("^");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("^");  // Primero el operador
+    tokens.addAll(op); // Luego el operando
     RESULT = tokens;
     System.out.println("Token de complemento añadido: " + tokens);
 :}
 | LLAVE_IZQ ID:id LLAVE_DER
 {:
     List<String> tokens = new ArrayList<>();
-    tokens.add(id);
+    tokens.add(id);  // Solo el identificador del conjunto
     RESULT = tokens;
     System.out.println("Identificador de conjunto añadido: " + tokens);
 :};
 
 
-// Evaluación de operaciones definidas
-Evaluacion ::= EVALUAR PAR_IZQ LLAVE_IZQ Conjunto:conjSet LLAVE_DER COMA ID:id PAR_DER PUNTOYCOMA:punto
-    {:
-        Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
+// Evaluación de tokens
+Evaluacion ::= EVALUAR PAR_IZQ  ELEMENTOS_EVALUAR: elementos COMA ID:id PAR_DER PUNTOYCOMA:punto
+{:
+    // Extraer los elementos de ELEMENTOS_EVALUAR (vienen en la forma "{a, b, c}")
+    String elementosStr = elementos;
+    
+    // Quitar las llaves '{' y '}' y luego separar los elementos por la coma ','
+    elementosStr = elementosStr.substring(1, elementosStr.length() - 1);  // Remueve '{' y '}'
+    String[] elementosArray = elementosStr.split(",\\s*");  // Divide por coma y opcionalmente espacios
 
-        if (resultadoOperacion != null) {
-            System.out.println("===============\nEvaluar: " + id + "\n===============");
-            System.out.println("Conjunto a evaluar: " + conjSet);
-            System.out.println("Resultado de la operación '" + id + "': " + resultadoOperacion);
-            for (Character elemento : conjSet) {
-                if (resultadoOperacion.contains(elemento)) {
-                    System.out.println(elemento + " -> exitoso");
-                } else {
-                    System.out.println(elemento + " -> fallo");
-                }
-            }
+    Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
+
+    // Verificar si la operación existe
+    if (resultadoOperacion == null) {
+        System.err.println("Operación no encontrada: " + id);
+        syntaxErrors.add(new SyntaxError(elementosleft, idright, "Operación no encontrada: " + id, "Error en la Evaluación"));
+    }
+
+    // Evaluar cada elemento contra la operación
+    System.out.println("===============");
+    System.out.println("Evaluar: " + id);
+    System.out.println("===============");
+
+    for (String elemento : elementosArray) {
+        elemento = elemento.trim();  // Remueve cualquier espacio alrededor del elemento
+        if (resultadoOperacion.contains(elemento.charAt(0))) {
+            System.out.println(elemento + " -> exitoso");
         } else {
-            System.err.println("Error: La operación '" + id + "' no está definida.");
+            System.out.println(elemento + " -> fallo");
         }
-    :};
+    }
+    System.out.println("===============");
+:};
+
+
