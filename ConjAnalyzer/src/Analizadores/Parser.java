@@ -11,6 +11,7 @@ import Conjuntos.ConjuntoManager;
 import Arbol.*;
 import Arbol.SimplificadorOperaciones;
 import Componentes.SyntaxError;
+import java.util.Stack;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
@@ -36,12 +37,13 @@ public class Parser extends java_cup.runtime.lr_parser {
   /** Production table. */
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
-    "\000\022\000\002\002\004\000\002\002\005\000\002\003" +
+    "\000\024\000\002\002\004\000\002\002\005\000\002\003" +
     "\004\000\002\003\002\000\002\004\003\000\002\004\003" +
-    "\000\002\004\003\000\002\005\010\000\002\011\005\000" +
-    "\002\011\005\000\002\011\003\000\002\006\010\000\002" +
-    "\007\005\000\002\007\005\000\002\007\005\000\002\007" +
-    "\004\000\002\007\005\000\002\010\013" });
+    "\000\002\004\003\000\002\004\003\000\002\004\004\000" +
+    "\002\005\010\000\002\011\005\000\002\011\005\000\002" +
+    "\011\003\000\002\006\010\000\002\007\005\000\002\007" +
+    "\005\000\002\007\005\000\002\007\004\000\002\007\005" +
+    "\000\002\010\011" });
 
   /** Access to production table. */
   public short[][] production_table() {return _production_table;}
@@ -49,43 +51,50 @@ public class Parser extends java_cup.runtime.lr_parser {
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\063\000\004\004\005\001\002\000\004\002\065\001" +
-    "\002\000\012\005\ufffe\023\010\024\006\025\007\001\002" +
-    "\000\004\006\042\001\002\000\004\015\032\001\002\000" +
-    "\004\006\020\001\002\000\012\005\ufffb\023\ufffb\024\ufffb" +
-    "\025\ufffb\001\002\000\012\005\ufffd\023\ufffd\024\ufffd\025" +
-    "\ufffd\001\002\000\012\005\ufffe\023\010\024\006\025\007" +
-    "\001\002\000\004\005\016\001\002\000\012\005\ufffc\023" +
-    "\ufffc\024\ufffc\025\ufffc\001\002\000\004\002\000\001\002" +
-    "\000\004\005\uffff\001\002\000\004\021\021\001\002\000" +
-    "\004\007\022\001\002\000\004\022\024\001\002\000\004" +
-    "\010\031\001\002\000\012\005\ufff7\010\ufff7\017\025\020" +
-    "\026\001\002\000\004\022\024\001\002\000\004\022\027" +
-    "\001\002\000\006\005\ufff9\010\ufff9\001\002\000\006\005" +
-    "\ufff8\010\ufff8\001\002\000\012\005\ufffa\023\ufffa\024\ufffa" +
-    "\025\ufffa\001\002\000\004\004\033\001\002\000\004\022" +
-    "\024\001\002\000\004\005\035\001\002\000\004\017\036" +
-    "\001\002\000\004\021\037\001\002\000\004\016\040\001" +
-    "\002\000\004\010\041\001\002\000\012\005\ufff0\023\ufff0" +
-    "\024\ufff0\025\ufff0\001\002\000\004\021\043\001\002\000" +
-    "\004\007\044\001\002\000\014\004\051\011\050\012\046" +
-    "\013\047\014\052\001\002\000\004\010\064\001\002\000" +
-    "\014\004\051\011\050\012\046\013\047\014\052\001\002" +
-    "\000\014\004\051\011\050\012\046\013\047\014\052\001" +
-    "\002\000\014\004\051\011\050\012\046\013\047\014\052" +
-    "\001\002\000\004\021\054\001\002\000\014\004\051\011" +
-    "\050\012\046\013\047\014\052\001\002\000\016\004\ufff2" +
+    "\000\064\000\004\004\005\001\002\000\004\002\066\001" +
+    "\002\000\016\003\015\005\ufffe\022\010\024\006\025\020" +
+    "\026\011\001\002\000\004\006\061\001\002\000\016\003" +
+    "\015\005\ufffe\022\010\024\006\025\020\026\011\001\002" +
+    "\000\024\003\ufff5\005\ufff5\010\ufff5\017\054\020\055\022" +
+    "\ufff5\024\ufff5\025\ufff5\026\ufff5\001\002\000\004\015\046" +
+    "\001\002\000\016\003\ufffb\005\ufffb\022\ufffb\024\ufffb\025" +
+    "\ufffb\026\ufffb\001\002\000\016\003\ufffd\005\ufffd\022\ufffd" +
+    "\024\ufffd\025\ufffd\026\ufffd\001\002\000\016\003\ufffc\005" +
+    "\ufffc\022\ufffc\024\ufffc\025\ufffc\026\ufffc\001\002\000\004" +
+    "\010\045\001\002\000\004\005\044\001\002\000\016\003" +
+    "\ufffa\005\ufffa\022\ufffa\024\ufffa\025\ufffa\026\ufffa\001\002" +
+    "\000\004\006\021\001\002\000\004\021\022\001\002\000" +
+    "\004\007\023\001\002\000\014\004\030\011\027\012\025" +
+    "\013\026\014\031\001\002\000\004\010\043\001\002\000" +
+    "\014\004\030\011\027\012\025\013\026\014\031\001\002" +
+    "\000\014\004\030\011\027\012\025\013\026\014\031\001" +
+    "\002\000\014\004\030\011\027\012\025\013\026\014\031" +
+    "\001\002\000\004\021\033\001\002\000\014\004\030\011" +
+    "\027\012\025\013\026\014\031\001\002\000\016\004\ufff0" +
+    "\010\ufff0\011\ufff0\012\ufff0\013\ufff0\014\ufff0\001\002\000" +
+    "\004\005\034\001\002\000\016\004\uffef\010\uffef\011\uffef" +
+    "\012\uffef\013\uffef\014\uffef\001\002\000\014\004\030\011" +
+    "\027\012\025\013\026\014\031\001\002\000\016\004\ufff2" +
     "\010\ufff2\011\ufff2\012\ufff2\013\ufff2\014\ufff2\001\002\000" +
-    "\004\005\055\001\002\000\016\004\ufff1\010\ufff1\011\ufff1" +
-    "\012\ufff1\013\ufff1\014\ufff1\001\002\000\014\004\051\011" +
-    "\050\012\046\013\047\014\052\001\002\000\016\004\ufff4" +
-    "\010\ufff4\011\ufff4\012\ufff4\013\ufff4\014\ufff4\001\002\000" +
-    "\014\004\051\011\050\012\046\013\047\014\052\001\002" +
-    "\000\016\004\ufff5\010\ufff5\011\ufff5\012\ufff5\013\ufff5\014" +
-    "\ufff5\001\002\000\014\004\051\011\050\012\046\013\047" +
-    "\014\052\001\002\000\016\004\ufff3\010\ufff3\011\ufff3\012" +
-    "\ufff3\013\ufff3\014\ufff3\001\002\000\012\005\ufff6\023\ufff6" +
-    "\024\ufff6\025\ufff6\001\002\000\004\002\001\001\002" });
+    "\014\004\030\011\027\012\025\013\026\014\031\001\002" +
+    "\000\016\004\ufff3\010\ufff3\011\ufff3\012\ufff3\013\ufff3\014" +
+    "\ufff3\001\002\000\014\004\030\011\027\012\025\013\026" +
+    "\014\031\001\002\000\016\004\ufff1\010\ufff1\011\ufff1\012" +
+    "\ufff1\013\ufff1\014\ufff1\001\002\000\016\003\ufff4\005\ufff4" +
+    "\022\ufff4\024\ufff4\025\ufff4\026\ufff4\001\002\000\004\002" +
+    "\000\001\002\000\016\003\ufff9\005\ufff9\022\ufff9\024\ufff9" +
+    "\025\ufff9\026\ufff9\001\002\000\004\023\047\001\002\000" +
+    "\004\017\050\001\002\000\004\021\051\001\002\000\004" +
+    "\016\052\001\002\000\004\010\053\001\002\000\016\003" +
+    "\uffee\005\uffee\022\uffee\024\uffee\025\uffee\026\uffee\001\002" +
+    "\000\004\022\010\001\002\000\004\022\056\001\002\000" +
+    "\020\003\ufff7\005\ufff7\010\ufff7\022\ufff7\024\ufff7\025\ufff7" +
+    "\026\ufff7\001\002\000\020\003\ufff6\005\ufff6\010\ufff6\022" +
+    "\ufff6\024\ufff6\025\ufff6\026\ufff6\001\002\000\004\005\uffff" +
+    "\001\002\000\004\021\062\001\002\000\004\007\063\001" +
+    "\002\000\004\022\010\001\002\000\004\010\065\001\002" +
+    "\000\016\003\ufff8\005\ufff8\022\ufff8\024\ufff8\025\ufff8\026" +
+    "\ufff8\001\002\000\004\002\001\001\002" });
 
   /** Access to parse-action table. */
   public short[][] action_table() {return _action_table;}
@@ -93,26 +102,26 @@ public class Parser extends java_cup.runtime.lr_parser {
   /** <code>reduce_goto</code> table. */
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
-    "\000\063\000\004\002\003\001\001\000\002\001\001\000" +
-    "\014\003\013\004\012\005\011\006\014\010\010\001\001" +
-    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\014\003\016\004\012" +
-    "\005\011\006\014\010\010\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\002\001\001\000\004\011\022\001\001\000" +
-    "\002\001\001\000\002\001\001\000\004\011\027\001\001" +
-    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\004\011\033\001\001" +
+    "\000\064\000\004\002\003\001\001\000\002\001\001\000" +
+    "\016\003\015\004\006\005\012\006\013\010\011\011\016" +
+    "\001\001\000\002\001\001\000\016\003\057\004\006\005" +
+    "\012\006\013\010\011\011\016\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\002\001\001\000\004\007\044\001\001\000" +
-    "\002\001\001\000\004\007\061\001\001\000\004\007\057" +
-    "\001\001\000\004\007\055\001\001\000\002\001\001\000" +
-    "\004\007\052\001\001\000\002\001\001\000\002\001\001" +
-    "\000\002\001\001\000\004\007\056\001\001\000\002\001" +
-    "\001\000\004\007\060\001\001\000\002\001\001\000\004" +
-    "\007\062\001\001\000\002\001\001\000\002\001\001\000" +
-    "\002\001\001" });
+    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\004\007\023\001\001\000\002\001\001\000\004" +
+    "\007\040\001\001\000\004\007\036\001\001\000\004\007" +
+    "\034\001\001\000\002\001\001\000\004\007\031\001\001" +
+    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
+    "\004\007\035\001\001\000\002\001\001\000\004\007\037" +
+    "\001\001\000\002\001\001\000\004\007\041\001\001\000" +
+    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\004\011\056\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\004\011\063\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001" });
 
   /** Access to <code>reduce_goto</code> table. */
   public short[][] reduce_table() {return _reduce_table;}
@@ -151,42 +160,50 @@ public class Parser extends java_cup.runtime.lr_parser {
 
 
 
-    private int errorCount = 0;
     private List<SyntaxError> syntaxErrors = new ArrayList<>(); // Lista para almacenar errores sintácticos
 
     ConjuntoManager conjuntoManager = new ConjuntoManager();
     SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
-    ArbolBuilder arbolBuilder = new ArbolBuilder(conjuntoManager);  // Crear el ArbolBuilder aquí
+    ArbolPrefijo arbolPrefijo = new ArbolPrefijo(conjuntoManager);
 
     public void syntax_error(Symbol s) {
-        String message = "Syntax Error in Line " + s.left + " Column " + s.right + ". Unexpected: " + s.value;
+        // Obtener los IDs de los tokens esperados
+        List<Integer> expected = expected_token_ids();
+        StringBuilder expectedTokens = new StringBuilder();
+        for (int id : expected) {
+            expectedTokens.append(symbol_name_from_id(id)).append(" ");
+        }
+
+        // Determinar el token inesperado
+        String unexpectedToken = (s != null && s.value != null) ? s.value.toString() : "Símbolo Desconocido";
+
+        // Construir el comentario con los tokens esperados
+        String comentario = "Se esperaba uno de los siguientes tokens: " + expectedTokens.toString().trim() + ".";
+
+        // Construir el mensaje para la salida de error
+        String message = "Error de Sintaxis en línea " + s.left + ", columna " + s.right + ". " +
+                         "Token inesperado: '" + unexpectedToken + "'. " + comentario;
+
+        // Imprimir el mensaje en la consola de errores
         System.err.println(message);
-        errorCount++;
-        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Syntax Error")); // Agregar a la lista de errores
+
+        // Agregar el error a la lista con el nuevo comentario
+        syntaxErrors.add(new SyntaxError(s.left, s.right, unexpectedToken, comentario));
     }
 
-    public void report_fatal_error(String message, Object info) {
-        Symbol s = (Symbol) info;
-        message = "Fatal Error: " + message + " at line " + s.left + ", column " + s.right;
-        System.err.println(message);
-        throw new RuntimeException(message);
-    }
-
-    public int getErrorCount() {
-        return errorCount;
-    }
-
-    public void unrecovered_syntax_error(Symbol s) throws Exception {
+    public void unrecovered_syntax_error(Symbol s) {
         String message = "Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value;
         System.err.println(message);
-        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Unrecovered Syntax Error")); // Agregar a la lista de errores
-        throw new Exception(message);
+        syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Unrecovered Syntax Error")); 
     }
 
     public Set<Character> obtenerConjunto(String nombre) {
         Set<Character> conjunto = conjuntoManager.obtenerConjunto(nombre);
         if (conjunto == null) {
-            throw new RuntimeException("El conjunto " + nombre + " no está definido.");
+            String message = "Error: El conjunto '" + nombre + "' no está definido.";
+            System.err.println(message);
+            syntaxErrors.add(new SyntaxError(0, 0, nombre, "Conjunto No Definido"));
+            return Collections.emptySet(); // Retornar conjunto vacío como medida de recuperación
         }
         return conjunto;
     }
@@ -195,6 +212,78 @@ public class Parser extends java_cup.runtime.lr_parser {
     public List<SyntaxError> getSyntaxErrors() {
         return syntaxErrors;
     }
+
+    public String symbol_name_from_id(int id) {
+        switch(id) {
+            case sym.PUNTOYCOMA: return "PUNTOYCOMA";
+            case sym.DIFERENCIA: return "DIFERENCIA";
+            case sym.DOSPUNTOS: return "DOSPUNTOS";
+            case sym.CONJUNTO: return "CONJUNTO";
+            case sym.HASTA: return "HASTA";
+            case sym.INTERSECCION: return "INTERSECCION";
+            case sym.FLECHA: return "FLECHA";
+            case sym.OPERA: return "OPERA";
+            case sym.ID: return "ID";
+            case sym.COMA: return "COMA";
+            case sym.EOF: return "EOF";
+            case sym.CONJ: return "CONJ";
+            case sym.PAR_IZQ: return "PAR_IZQ";
+            case sym.UNION: return "UNION";
+            case sym.error: return "error";
+            case sym.PAR_DER: return "PAR_DER";
+            case sym.COMPLEMENTO: return "COMPLEMENTO";
+            case sym.LLAVE_IZQ: return "LLAVE_IZQ";
+            case sym.EVALUAR: return "EVALUAR";
+            case sym.LLAVE_DER: return "LLAVE_DER";
+            case sym.ELEMENTOS_EVALUAR: return "ELEMENTOS_EVALUAR";
+            default: return "Símbolo Desconocido";
+        }
+    }
+
+   // Implementación de validate_expected_symbol para verificar si un ID de símbolo es válido
+    protected boolean validate_expected_symbol(int id) {
+        switch(id) {
+            case sym.PUNTOYCOMA:
+            case sym.DIFERENCIA:
+            case sym.DOSPUNTOS:
+            case sym.CONJUNTO:
+            case sym.HASTA:
+            case sym.INTERSECCION:
+            case sym.FLECHA:
+            case sym.ELEMENTOS_EVALUAR:
+            case sym.OPERA:
+            case sym.ID:
+            case sym.COMA:
+            case sym.EOF:
+            case sym.CONJ:
+            case sym.PAR_IZQ:
+            case sym.UNION:
+            case sym.error:
+            case sym.PAR_DER:
+            case sym.COMPLEMENTO:
+            case sym.LLAVE_IZQ:
+            case sym.EVALUAR:
+            case sym.LLAVE_DER:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Método para obtener los IDs de los tokens esperados
+    public List<Integer> expected_token_ids() {
+        List<Integer> expectedTokens = new LinkedList<>();
+        int state = ((Symbol) stack.peek()).parse_state;
+        short[] actions = action_tab[state];
+
+        for (int i = 0; i < actions.length; i += 2) {
+            if (actions[i] != -1 && validate_expected_symbol(actions[i])) {
+                expectedTokens.add((int) actions[i]);
+            }
+        }
+        return expectedTokens;
+    }
+
 
 
 /** Cup generated class to encapsulate user supplied action code.*/
@@ -246,9 +335,6 @@ class CUP$Parser$actions {
 		int llrright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object llr = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		 
-        System.out.println("Token: " + llz);
-        System.out.println("Token: " + llr);
-        System.out.println("Regla: Programa ::= LLAVE_IZQ Sentencias LLAVE_DER"); 
     
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("Programa",0, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -300,7 +386,34 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 7: // DefinicionConjunto ::= CONJ DOSPUNTOS ID FLECHA Conjunto PUNTOYCOMA 
+          case 7: // Sentencia ::= Conjunto 
+            {
+              Object RESULT =null;
+
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Sentencia",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
+            }
+          return CUP$Parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 8: // Sentencia ::= error PUNTOYCOMA 
+            {
+              Object RESULT =null;
+		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		 
+                List<Integer> expected = expected_token_ids();
+                StringBuilder expectedTokens = new StringBuilder();
+                for (int id : expected) {
+                    expectedTokens.append(symbol_name_from_id(id)).append(" ");
+                }
+              
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Sentencia",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
+            }
+          return CUP$Parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 9: // DefinicionConjunto ::= CONJ DOSPUNTOS ID FLECHA Conjunto PUNTOYCOMA 
             {
               Object RESULT =null;
 		int conjleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).left;
@@ -331,7 +444,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 8: // Conjunto ::= CONJUNTO HASTA CONJUNTO 
+          case 10: // Conjunto ::= CONJUNTO HASTA CONJUNTO 
             {
               Set<Character> RESULT =null;
 		int conj1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
@@ -353,7 +466,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 9: // Conjunto ::= CONJUNTO COMA Conjunto 
+          case 11: // Conjunto ::= CONJUNTO COMA Conjunto 
             {
               Set<Character> RESULT =null;
 		int conj1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
@@ -375,7 +488,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 10: // Conjunto ::= CONJUNTO 
+          case 12: // Conjunto ::= CONJUNTO 
             {
               Set<Character> RESULT =null;
 		int conj1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
@@ -393,7 +506,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 11: // DefinicionOperacion ::= OPERA DOSPUNTOS ID FLECHA OperacionTokens PUNTOYCOMA 
+          case 13: // DefinicionOperacion ::= OPERA DOSPUNTOS ID FLECHA OperacionTokens PUNTOYCOMA 
             {
               Object RESULT =null;
 		int operaleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).left;
@@ -415,19 +528,40 @@ class CUP$Parser$actions {
 		int puntoright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object punto = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    Nodo arbol = arbolBuilder.construirArbol(tokens);
-    Set<Character> resultado = arbol.evaluar();
-    conjuntoManager.guardarOperacion(id, arbol.mostrarContenido(), resultado);
-    System.out.println("Operación '" + id + "' simplificada y guardada.");
-    System.out.println("Árbol de operación simplificada: " + arbol);
-    System.out.println("Resultado de la operación: " + resultado);
+    try {
+        // Crear instancia de ArbolPrefijo con el conjuntoManager
+        ArbolPrefijo arbolBuilder = new ArbolPrefijo(conjuntoManager);
+
+        // Construir el árbol de acuerdo a los tokens prefijos
+        Nodo arbol = arbolBuilder.construirArbol(tokens);
+
+        // Integrar el simplificador
+        SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
+        Nodo arbolSimplificado = simplificador.simplificar(arbol, id);
+
+        Set<Character> resultado = arbolSimplificado.evaluar();
+        conjuntoManager.guardarOperacion(id, arbolSimplificado.mostrarContenido(), resultado);
+
+        System.out.println("Operación '" + id + "' simplificada y guardada.");
+        System.out.println("Árbol de operación simplificada: " + arbolSimplificado);
+        System.out.println("Resultado de la operación: " + resultado);
+
+// Generar archivo JSON con el resultado de la simplificación
+            simplificador.generarJSON("./src/Salidas/operaciones_simplificadas.json");
+            System.out.println("Archivo JSON de operaciones simplificadas generado.");
+
+    } catch (Exception e) {
+        String message = "Error al definir operación '" + id + "': " + e.getMessage();
+        System.err.println(message);
+        syntaxErrors.add(new SyntaxError(operaleft, puntoright, e.getMessage(), "Error en la Definición de Operación"));
+    }
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("DefinicionOperacion",4, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 12: // OperacionTokens ::= DIFERENCIA OperacionTokens OperacionTokens 
+          case 14: // OperacionTokens ::= DIFERENCIA OperacionTokens OperacionTokens 
             {
               List<String> RESULT =null;
 		int difleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
@@ -440,9 +574,10 @@ class CUP$Parser$actions {
 		int op2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		List<String> op2 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>(op1);
-    tokens.addAll(op2);
-    tokens.add("-");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("-");  // Primero se añade el operador para notación prefija
+    tokens.addAll(op1); // Luego el primer operando
+    tokens.addAll(op2); // Luego el segundo operando
     RESULT = tokens;
     System.out.println("Token de diferencia añadido: " + tokens);
 
@@ -451,7 +586,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 13: // OperacionTokens ::= UNION OperacionTokens OperacionTokens 
+          case 15: // OperacionTokens ::= UNION OperacionTokens OperacionTokens 
             {
               List<String> RESULT =null;
 		int unionleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
@@ -464,9 +599,10 @@ class CUP$Parser$actions {
 		int op2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		List<String> op2 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>(op1);
-    tokens.addAll(op2);
-    tokens.add("U");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("U");  // Primero el operador
+    tokens.addAll(op1); // Luego el primer operando
+    tokens.addAll(op2); // Luego el segundo operando
     RESULT = tokens;
     System.out.println("Token de unión añadido: " + tokens);
 
@@ -475,7 +611,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 14: // OperacionTokens ::= INTERSECCION OperacionTokens OperacionTokens 
+          case 16: // OperacionTokens ::= INTERSECCION OperacionTokens OperacionTokens 
             {
               List<String> RESULT =null;
 		int interleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
@@ -488,9 +624,10 @@ class CUP$Parser$actions {
 		int op2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		List<String> op2 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>(op1);
-    tokens.addAll(op2);
-    tokens.add("&");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("&");  // Primero el operador
+    tokens.addAll(op1); // Luego el primer operando
+    tokens.addAll(op2); // Luego el segundo operando
     RESULT = tokens;
     System.out.println("Token de intersección añadido: " + tokens);
 
@@ -499,7 +636,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 15: // OperacionTokens ::= COMPLEMENTO OperacionTokens 
+          case 17: // OperacionTokens ::= COMPLEMENTO OperacionTokens 
             {
               List<String> RESULT =null;
 		int complleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
@@ -509,8 +646,9 @@ class CUP$Parser$actions {
 		int opright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		List<String> op = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>(op);
-    tokens.add("^");
+    List<String> tokens = new ArrayList<>();
+    tokens.add("^");  // Primero el operador
+    tokens.addAll(op); // Luego el operando
     RESULT = tokens;
     System.out.println("Token de complemento añadido: " + tokens);
 
@@ -519,7 +657,7 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 16: // OperacionTokens ::= LLAVE_IZQ ID LLAVE_DER 
+          case 18: // OperacionTokens ::= LLAVE_IZQ ID LLAVE_DER 
             {
               List<String> RESULT =null;
 		int idleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
@@ -527,7 +665,7 @@ class CUP$Parser$actions {
 		String id = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
     List<String> tokens = new ArrayList<>();
-    tokens.add(id);
+    tokens.add(id);  // Solo el identificador del conjunto
     RESULT = tokens;
     System.out.println("Identificador de conjunto añadido: " + tokens);
 
@@ -536,12 +674,12 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 17: // Evaluacion ::= EVALUAR PAR_IZQ LLAVE_IZQ Conjunto LLAVE_DER COMA ID PAR_DER PUNTOYCOMA 
+          case 19: // Evaluacion ::= EVALUAR PAR_IZQ ELEMENTOS_EVALUAR COMA ID PAR_DER PUNTOYCOMA 
             {
               Object RESULT =null;
-		int conjSetleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).left;
-		int conjSetright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).right;
-		Set<Character> conjSet = (Set<Character>)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-5)).value;
+		int elementosleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)).left;
+		int elementosright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)).right;
+		String elementos = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-4)).value;
 		int idleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
 		String id = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
@@ -549,24 +687,37 @@ class CUP$Parser$actions {
 		int puntoright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object punto = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-        Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
-
-        if (resultadoOperacion != null) {
-            System.out.println("===============\nEvaluar: " + id + "\n===============");
-            System.out.println("Conjunto a evaluar: " + conjSet);
-            System.out.println("Resultado de la operación '" + id + "': " + resultadoOperacion);
-            for (Character elemento : conjSet) {
-                if (resultadoOperacion.contains(elemento)) {
-                    System.out.println(elemento + " -> exitoso");
-                } else {
-                    System.out.println(elemento + " -> fallo");
-                }
-            }
-        } else {
-            System.err.println("Error: La operación '" + id + "' no está definida.");
-        }
+    // Extraer los elementos de ELEMENTOS_EVALUAR (vienen en la forma "{a, b, c}")
+    String elementosStr = elementos;
     
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Evaluacion",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-8)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
+    // Quitar las llaves '{' y '}' y luego separar los elementos por la coma ','
+    elementosStr = elementosStr.substring(1, elementosStr.length() - 1);  // Remueve '{' y '}'
+    String[] elementosArray = elementosStr.split(",\\s*");  // Divide por coma y opcionalmente espacios
+
+    Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
+
+    // Verificar si la operación existe
+    if (resultadoOperacion == null) {
+        System.err.println("Operación no encontrada: " + id);
+        syntaxErrors.add(new SyntaxError(elementosleft, idright, "Operación no encontrada: " + id, "Error en la Evaluación"));
+    }
+
+    // Evaluar cada elemento contra la operación
+    System.out.println("===============");
+    System.out.println("Evaluar: " + id);
+    System.out.println("===============");
+
+    for (String elemento : elementosArray) {
+        elemento = elemento.trim();  // Remueve cualquier espacio alrededor del elemento
+        if (resultadoOperacion.contains(elemento.charAt(0))) {
+            System.out.println(elemento + " -> exitoso");
+        } else {
+            System.out.println(elemento + " -> fallo");
+        }
+    }
+    System.out.println("===============");
+
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Evaluacion",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
