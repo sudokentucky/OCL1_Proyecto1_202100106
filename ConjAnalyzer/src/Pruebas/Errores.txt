@@ -1,0 +1,20 @@
+CONJ : conjuntoA -> a~z;       # Definición válida
+
+CONJ : conjuntoB -> m, j, d, 1; # Definición válida
+
+OPERA : operacion1 -> U {conjuntoA} {conjuntoB}; # Definición válida
+
+<! Esto es un comentario multilínea sin cerrar !>
+
+% #Este es un carácter inválido fuera del Conjunto Universo
+CONJ : conjuntoC -> ^a~z;      # Uso incorrecto de carácter en la definición
+
+EVALUAR ( {a, b, c} , operacion1 ); # Evaluación válida
+
+EVALUAR ( {1, b, } , operacion2 );  # Evaluación válida pero con un posible error si operacion2 no está definida
+
+¡ Este es un carácter inválido (ASCII 161) fuera del Conjunto Universo
+Æ Este es otro carácter inválido (ASCII 198) fuera del Conjunto Universo
+
+OPERA : operacion2 -> & {conjuntoA} {conjuntoB}; # Definición válida
+
