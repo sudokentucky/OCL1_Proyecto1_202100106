@@ -3,20 +3,50 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Interfaz;
+import Analizadores.AnalizadorLexico;
+import Analizadores.Parser;
+import Arbol.ArbolPrefijo;
+import Arbol.SimplificadorOperaciones;
+import java.io.StringReader;
+import Componentes.Token;
+import Componentes.LexicalError;
+import Componentes.SyntaxError;
+import Conjuntos.ConjuntoManager;
+import java.util.List;
+import javax.swing.SwingUtilities;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author Keneth Lopez
  */
+
+
 public class Inicio extends javax.swing.JFrame {
+    private OutputManager outputManager;
+    private ConjuntoManager conjuntoManager;
+    private SimplificadorOperaciones simplificador;
+    private ArbolPrefijo arbolPrefijo;
+
 
     /**
      * Creates new form Inicio
      */
     public Inicio() {
+        this.outputManager = new OutputManager();  // Crear una nueva instancia de OutputManager
+        this.conjuntoManager = new ConjuntoManager();  // Crear una nueva instancia de ConjuntoManager
+        this.simplificador = new SimplificadorOperaciones(conjuntoManager);
+        this.arbolPrefijo = new ArbolPrefijo(conjuntoManager);
+ 
         initComponents();
     }
-
+    
+   
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -26,22 +56,23 @@ public class Inicio extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
         entrada = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
+        Salida = new javax.swing.JTextPane();
         entrada1 = new javax.swing.JLabel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        TextoEnrada = new javax.swing.JTextArea();
+        jPanel1 = new javax.swing.JPanel();
         entrada2 = new javax.swing.JLabel();
-        graph = new javax.swing.JPanel();
-        previous = new javax.swing.JButton();
-        next = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         Archivo = new javax.swing.JMenu();
         NewFile = new javax.swing.JMenuItem();
         save = new javax.swing.JMenuItem();
         saveAs = new javax.swing.JMenuItem();
         excecute = new javax.swing.JMenu();
+        AnalisisExcecute = new javax.swing.JMenuItem();
         Reportes = new javax.swing.JMenu();
         Tokens = new javax.swing.JMenuItem();
         LexerErr = new javax.swing.JMenuItem();
@@ -49,45 +80,36 @@ public class Inicio extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane2.setViewportView(jTextArea1);
-
         entrada.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         entrada.setText("Entrada");
 
-        jScrollPane1.setViewportView(jTextPane1);
+        Salida.setEditable(false);
+        jScrollPane1.setViewportView(Salida);
 
         entrada1.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         entrada1.setText("Consola");
 
-        entrada2.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
-        entrada2.setText("Graficas");
+        TextoEnrada.setColumns(20);
+        TextoEnrada.setRows(5);
+        jScrollPane4.setViewportView(TextoEnrada);
 
-        javax.swing.GroupLayout graphLayout = new javax.swing.GroupLayout(graph);
-        graph.setLayout(graphLayout);
-        graphLayout.setHorizontalGroup(
-            graphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 371, Short.MAX_VALUE)
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 442, Short.MAX_VALUE)
         );
-        graphLayout.setVerticalGroup(
-            graphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
 
-        previous.setText("Anterior");
-        previous.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                previousActionPerformed(evt);
-            }
-        });
+        entrada2.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
+        entrada2.setText("Graficas");
 
-        next.setText("Siguiente");
-        next.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nextActionPerformed(evt);
-            }
-        });
+        jButton1.setText("Anterior");
+
+        jButton2.setText("Siguiente");
 
         Archivo.setText("Archivo");
 
@@ -100,14 +122,33 @@ public class Inicio extends javax.swing.JFrame {
         Archivo.add(NewFile);
 
         save.setText("Guardar");
+        save.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveActionPerformed(evt);
+            }
+        });
         Archivo.add(save);
 
         saveAs.setText("Guardar como");
+        saveAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveAsActionPerformed(evt);
+            }
+        });
         Archivo.add(saveAs);
 
         jMenuBar1.add(Archivo);
 
         excecute.setText("Ejecutar");
+
+        AnalisisExcecute.setText("Analisis");
+        AnalisisExcecute.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AnalisisExcecuteActionPerformed(evt);
+            }
+        });
+        excecute.add(AnalisisExcecute);
+
         jMenuBar1.add(excecute);
 
         Reportes.setText("Reportes");
@@ -130,9 +171,19 @@ public class Inicio extends javax.swing.JFrame {
         Reportes.add(Tokens);
 
         LexerErr.setText("Errores Lexicos");
+        LexerErr.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LexerErrActionPerformed(evt);
+            }
+        });
         Reportes.add(LexerErr);
 
         SyntaxErr.setText("Errores Sintacticos");
+        SyntaxErr.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SyntaxErrActionPerformed(evt);
+            }
+        });
         Reportes.add(SyntaxErr);
 
         jMenuBar1.add(Reportes);
@@ -146,50 +197,49 @@ public class Inicio extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(41, 41, 41)
+                        .addGap(129, 129, 129)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 859, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(39, 39, 39)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(entrada1)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 528, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(59, 59, 59)
-                                .addComponent(graph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 897, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(426, 426, 426)
-                        .addComponent(entrada1)))
-                .addContainerGap(42, Short.MAX_VALUE))
+                                .addGap(30, 30, 30)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(130, 130, 130)
+                                .addComponent(jButton1)
+                                .addGap(99, 99, 99)
+                                .addComponent(jButton2)))))
+                .addContainerGap(54, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGap(233, 233, 233)
+                .addGap(265, 265, 265)
                 .addComponent(entrada)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(entrada2)
-                .addGap(223, 223, 223))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(previous)
-                .addGap(103, 103, 103)
-                .addComponent(next)
-                .addGap(131, 131, 131))
+                .addGap(248, 248, 248))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(21, 21, 21)
+                .addGap(34, 34, 34)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(entrada)
                     .addComponent(entrada2))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(graph, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
+                .addGap(29, 29, 29)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(previous)
-                    .addComponent(next))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(entrada1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(35, Short.MAX_VALUE))
+                    .addComponent(entrada1)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(66, Short.MAX_VALUE))
         );
 
         pack();
@@ -201,20 +251,231 @@ public class Inicio extends javax.swing.JFrame {
 
     private void TokensActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TokensActionPerformed
         // TODO add your handling code here:
+        abrirReporte("tokens_report.html");
+
     }//GEN-LAST:event_TokensActionPerformed
+
+    private File currentFile = null;
+
+    private void saveToFile(File file) {
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            // Escribe el contenido del JTextArea en el archivo
+            fileWriter.write(TextoEnrada.getText());
+            JOptionPane.showMessageDialog(this, "Archivo guardado exitosamente.", "Guardar Archivo", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     private void NewFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewFileActionPerformed
         // TODO add your handling code here:
+        if (!TextoEnrada.getText().isEmpty()) {
+            int confirm = JOptionPane.showConfirmDialog(this, 
+                "Hay cambios no guardados. ¿Desea guardar antes de crear un nuevo archivo?",
+                "Confirmar Nuevo Archivo", 
+                JOptionPane.YES_NO_CANCEL_OPTION, 
+                JOptionPane.WARNING_MESSAGE);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                saveActionPerformed(evt);
+            } else if (confirm == JOptionPane.CANCEL_OPTION) {
+                return;
+            }
+        }
+
+        TextoEnrada.setText("");
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Guardar Nuevo Archivo");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos CA (.ca)", "ca"));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            if (!fileToSave.getName().endsWith(".ca")) {
+                fileToSave = new File(fileToSave.getAbsolutePath() + ".ca");
+            }
+            saveToFile(fileToSave);
+            currentFile = fileToSave;
+
+            JOptionPane.showMessageDialog(this, "Nuevo archivo creado y guardado exitosamente.", "Nuevo Archivo", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Operación cancelada. El archivo no se ha guardado.", "Operación Cancelada", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_NewFileActionPerformed
 
-    private void previousActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_previousActionPerformed
+    private void AnalisisExcecuteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AnalisisExcecuteActionPerformed
+        // Verificar si el JTextArea está vacío antes de proceder
+        if (TextoEnrada.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El área de texto está vacía. Por favor ingrese el código a analizar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-    private void nextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nextActionPerformed
+        // Limpiar las salidas previas
+        outputManager.clearOutputs();
 
+        // Obtener el texto del JTextArea
+        String textoEntrada = TextoEnrada.getText();
+
+        // Crear un StringReader a partir del texto de entrada
+        StringReader sr = new StringReader(textoEntrada);
+
+        // Crear el analizador léxico
+        AnalizadorLexico lexer = new AnalizadorLexico(sr);
+
+        // Crear el analizador sintáctico (parser) con el lexer y OutputManager
+        Parser parser = new Parser(lexer, outputManager, conjuntoManager, simplificador, arbolPrefijo);
+
+        try {
+            // Ejecutar el análisis sintáctico
+            parser.parse();
+
+            // Generar reportes HTML para tokens, errores léxicos y sintácticos
+            generarYGuardarReportes(lexer, parser);
+            // Actualizar JTextPane en el Event Dispatch Thread (EDT)
+            SwingUtilities.invokeLater(() -> {
+                Salida.setContentType("text/html");
+                Salida.setText(outputManager.getAllOutputs());
+            });
+            
+            System.out.println("------------------- Operaciones luego del parser ----------------------------");
+            System.out.println(conjuntoManager.getOperaciones()); 
+            System.out.println("------------------------------------");
+            simplificador.generarJSON("./src/Salidas/operaciones.json");
+
+            // Mostrar mensaje de éxito
+            JOptionPane.showMessageDialog(this, "Análisis léxico y sintáctico completado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            // Manejo de cualquier otro error
+            e.printStackTrace();
+            SwingUtilities.invokeLater(() -> {
+                Salida.setText("Ocurrió un error durante el análisis: " + e.getMessage());
+            });
+            JOptionPane.showMessageDialog(this, "Ocurrió un error durante el análisis: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_AnalisisExcecuteActionPerformed
+
+    private void generarYGuardarReportes(AnalizadorLexico lexer, Parser parser) {
+        // Obtener tokens y errores del lexer y parser
+        List<Token> tokens = lexer.getTokens();
+        List<LexicalError> lexicalErrors = lexer.getErrors();
+        List<SyntaxError> syntaxErrors = parser.getSyntaxErrors();
+
+        // Generar y guardar reportes HTML si las listas no están vacías
+        if (!tokens.isEmpty()) {
+            guardarReporteTokens(tokens);
+        } else {
+            JOptionPane.showMessageDialog(this, "No se encontraron tokens para generar el reporte.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        if (!lexicalErrors.isEmpty()) {
+            guardarReporteLexicalErrors(lexicalErrors);
+        } else {
+            JOptionPane.showMessageDialog(this, "No se encontraron errores léxicos para generar el reporte.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        if (!syntaxErrors.isEmpty()) {
+            guardarReporteSyntaxErrors(syntaxErrors);
+        } else {
+            JOptionPane.showMessageDialog(this, "No se encontraron errores sintácticos para generar el reporte.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void guardarReporteTokens(List<Token> tokens) {
+        try {
+            String htmlContent = Token.generarTablaHTML(tokens);
+            String filePath = "tokens_report.html";
+            Token.guardarHTMLenArchivo(htmlContent, filePath);
+            JOptionPane.showMessageDialog(this, "Reporte de tokens guardado exitosamente en " + filePath, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar el reporte de tokens: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    private void guardarReporteLexicalErrors(List<LexicalError> erroresLexicos) {
+        try {
+            String htmlContent = LexicalError.generarTablaHTML(erroresLexicos);
+            String filePath = "lexical_errors_report.html";
+            LexicalError.guardarHTMLenArchivo(htmlContent, filePath);
+            JOptionPane.showMessageDialog(this, "Reporte de errores léxicos guardado exitosamente en " + filePath, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar el reporte de errores léxicos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    private void guardarReporteSyntaxErrors(List<SyntaxError> erroresSintacticos) {
+        try {
+            String htmlContent = SyntaxError.generarTablaHTML(erroresSintacticos);
+            String filePath = "syntax_errors_report.html";
+            SyntaxError.guardarHTMLenArchivo(htmlContent, filePath);
+            JOptionPane.showMessageDialog(this, "Reporte de errores sintácticos guardado exitosamente en " + filePath, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar el reporte de errores sintácticos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    private void LexerErrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LexerErrActionPerformed
+        // TODO add your handling code here:
+        abrirReporte("lexical_errors_report.html");
+
+    }//GEN-LAST:event_LexerErrActionPerformed
+
+    private void SyntaxErrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SyntaxErrActionPerformed
+        // TODO add your handling code here:
+        abrirReporte("syntax_errors_report.html");
+
+    }//GEN-LAST:event_SyntaxErrActionPerformed
+
+    private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
+        // TODO add your handling code here:
+        if (currentFile != null) {
+            // Guardar el archivo actual
+            saveToFile(currentFile);
+        } else {
+            // Si no hay un archivo actual, usar Guardar como
+            saveAsActionPerformed(evt);
+        }
+    }//GEN-LAST:event_saveActionPerformed
+
+    private void saveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+
+        // Configurar el filtro de archivos para que sólo muestre archivos con extensión .ca
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos CA (.ca)", "ca"));
+
+        // Mostrar el diálogo de guardar archivo
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            // Obtener el archivo seleccionado
+            File fileToSave = fileChooser.getSelectedFile();
+
+            // Asegurarse de que el archivo tiene la extensión .ca
+            if (!fileToSave.getName().endsWith(".ca")) {
+                fileToSave = new File(fileToSave.getAbsolutePath() + ".ca");
+            }
+
+            // Guardar el archivo
+            saveToFile(fileToSave);
+
+            // Actualizar la referencia al archivo actual
+            currentFile = fileToSave;
+        }
+    }//GEN-LAST:event_saveAsActionPerformed
+
+    private void abrirReporte(String filePath) {
+        try {
+            // Abrir el archivo HTML en el navegador predeterminado del sistema
+            java.awt.Desktop.getDesktop().browse(java.nio.file.Paths.get(filePath).toUri());
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "No se pudo abrir el reporte: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     /**
      * @param args the command line arguments
      */
@@ -245,30 +506,32 @@ public class Inicio extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Inicio().setVisible(true);
             }
         });
+        
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem AnalisisExcecute;
     private javax.swing.JMenu Archivo;
     private javax.swing.JMenuItem LexerErr;
     private javax.swing.JMenuItem NewFile;
     private javax.swing.JMenu Reportes;
+    private javax.swing.JTextPane Salida;
     private javax.swing.JMenuItem SyntaxErr;
+    private javax.swing.JTextArea TextoEnrada;
     private javax.swing.JMenuItem Tokens;
     private javax.swing.JLabel entrada;
     private javax.swing.JLabel entrada1;
     private javax.swing.JLabel entrada2;
     private javax.swing.JMenu excecute;
-    private javax.swing.JPanel graph;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextPane jTextPane1;
-    private javax.swing.JButton next;
-    private javax.swing.JButton previous;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JMenuItem save;
     private javax.swing.JMenuItem saveAs;
     // End of variables declaration//GEN-END:variables

@@ -21,11 +21,17 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Guardar"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="saveAs">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Guardar como"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveAsActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -33,6 +39,16 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Ejecutar"/>
           </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="AnalisisExcecute">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Analisis"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="AnalisisExcecuteActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="Reportes">
           <Properties>
@@ -54,11 +70,17 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Errores Lexicos"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="LexerErrActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="SyntaxErr">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Errores Sintacticos"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SyntaxErrActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -91,82 +113,67 @@
           <Group type="102" attributes="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="41" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Component id="jScrollPane2" min="-2" pref="458" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
-                              <Component id="graph" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Component id="jScrollPane1" min="-2" pref="897" max="-2" attributes="0"/>
-                      </Group>
+                      <EmptySpace min="-2" pref="129" max="-2" attributes="0"/>
+                      <Component id="jScrollPane1" min="-2" pref="859" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="426" max="-2" attributes="0"/>
-                      <Component id="entrada1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Component id="entrada1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jScrollPane4" min="-2" pref="528" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
+                              <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="130" max="-2" attributes="0"/>
+                              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="99" max="-2" attributes="0"/>
+                              <Component id="jButton2" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
                   </Group>
               </Group>
-              <EmptySpace pref="42" max="32767" attributes="0"/>
+              <EmptySpace pref="54" max="32767" attributes="0"/>
           </Group>
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" pref="233" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="265" max="-2" attributes="0"/>
               <Component id="entrada" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
               <Component id="entrada2" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="223" max="-2" attributes="0"/>
-          </Group>
-          <Group type="102" alignment="1" attributes="0">
-              <EmptySpace max="32767" attributes="0"/>
-              <Component id="previous" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="103" max="-2" attributes="0"/>
-              <Component id="next" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="131" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="248" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
-              <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="entrada" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="entrada2" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="graph" max="32767" attributes="0"/>
-                  <Component id="jScrollPane2" pref="254" max="32767" attributes="0"/>
+                  <Component id="jPanel1" max="32767" attributes="0"/>
+                  <Component id="jScrollPane4" pref="302" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="entrada1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jButton2" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="previous" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="next" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="entrada1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" min="-2" pref="221" max="-2" attributes="0"/>
-              <EmptySpace pref="35" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" min="-2" pref="294" max="-2" attributes="0"/>
+              <EmptySpace pref="66" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane2">
-      <AuxValues>
-        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-      </AuxValues>
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-      <SubComponents>
-        <Component class="javax.swing.JTextArea" name="jTextArea1">
-          <Properties>
-            <Property name="columns" type="int" value="20"/>
-            <Property name="rows" type="int" value="5"/>
-          </Properties>
-        </Component>
-      </SubComponents>
-    </Container>
     <Component class="javax.swing.JLabel" name="entrada">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -182,7 +189,10 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTextPane" name="jTextPane1">
+        <Component class="javax.swing.JTextPane" name="Salida">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>
@@ -194,20 +204,24 @@
         <Property name="text" type="java.lang.String" value="Consola"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="entrada2">
-      <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Segoe UI Black" size="14" style="0"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Graficas"/>
-      </Properties>
-    </Component>
-    <Container class="javax.swing.JPanel" name="graph">
+    <Container class="javax.swing.JScrollPane" name="jScrollPane4">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JTextArea" name="TextoEnrada">
+          <Properties>
+            <Property name="columns" type="int" value="20"/>
+            <Property name="rows" type="int" value="5"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JPanel" name="jPanel1">
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="371" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="442" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -217,21 +231,23 @@
         </DimensionLayout>
       </Layout>
     </Container>
-    <Component class="javax.swing.JButton" name="previous">
+    <Component class="javax.swing.JLabel" name="entrada2">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Segoe UI Black" size="14" style="0"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Graficas"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="jButton1">
       <Properties>
         <Property name="text" type="java.lang.String" value="Anterior"/>
       </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="previousActionPerformed"/>
-      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="next">
+    <Component class="javax.swing.JButton" name="jButton2">
       <Properties>
         <Property name="text" type="java.lang.String" value="Siguiente"/>
       </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nextActionPerformed"/>
-      </Events>
     </Component>
   </SubComponents>
 </Form>
