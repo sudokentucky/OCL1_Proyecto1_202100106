@@ -12,6 +12,5 @@ import java.util.Set;
 public abstract class Nodo {
     public abstract Set<Character> evaluar();
     public abstract String mostrarContenido();
-    @Override
     public abstract String toString();
 }
