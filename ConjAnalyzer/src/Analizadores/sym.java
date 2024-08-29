@@ -15,18 +15,19 @@ public class sym {
   public static final int HASTA = 14;
   public static final int INTERSECCION = 8;
   public static final int FLECHA = 5;
-  public static final int OPERA = 18;
+  public static final int OPERA = 19;
   public static final int ID = 15;
   public static final int COMA = 13;
   public static final int EOF = 0;
-  public static final int CONJ = 17;
+  public static final int ELEMENTOS_EVALUAR = 17;
+  public static final int CONJ = 18;
   public static final int PAR_IZQ = 11;
   public static final int UNION = 7;
   public static final int error = 1;
   public static final int PAR_DER = 12;
   public static final int COMPLEMENTO = 10;
   public static final int LLAVE_IZQ = 2;
-  public static final int EVALUAR = 19;
+  public static final int EVALUAR = 20;
   public static final int LLAVE_DER = 3;
   public static final String[] terminalNames = new String[] {
   "EOF",
@@ -46,6 +47,7 @@ public class sym {
   "HASTA",
   "ID",
   "CONJUNTO",
+  "ELEMENTOS_EVALUAR",
   "CONJ",
   "OPERA",
   "EVALUAR"

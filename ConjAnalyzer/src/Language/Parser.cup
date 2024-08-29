@@ -5,17 +5,27 @@ import java.util.*;
 import Conjuntos.ConjuntoManager;
 import Arbol.*;
 import Arbol.SimplificadorOperaciones;
-import Componentes.SyntaxError; // Importar la clase SyntaxError
+import Componentes.SyntaxError;
+import Interfaz.OutputManager;
 import java.util.Stack;
 
 parser code {:
-    private List<SyntaxError> syntaxErrors = new ArrayList<>(); // Lista para almacenar errores sintácticos
+        private List<SyntaxError> syntaxErrors = new ArrayList<>();
+        private OutputManager outputManager;
+        private ConjuntoManager conjuntoManager;
+        private SimplificadorOperaciones simplificador;
+        private ArbolPrefijo arbolPrefijo;
 
-    ConjuntoManager conjuntoManager = new ConjuntoManager();
-    SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
-    ArbolPrefijo arbolPrefijo = new ArbolPrefijo(conjuntoManager);
+        public Parser(AnalizadorLexico lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolPrefijo arbolPrefijo) {
+            super(lexer);
+            this.outputManager = outputManager;
+            this.conjuntoManager = conjuntoManager;  
+            this.simplificador = simplificador;
+            this.arbolPrefijo = arbolPrefijo; 
+            this.init_actions(); 
+        }
 
-    public void syntax_error(Symbol s) {
+   public void syntax_error(Symbol s) {
         // Obtener los IDs de los tokens esperados
         List<Integer> expected = expected_token_ids();
         StringBuilder expectedTokens = new StringBuilder();
@@ -38,11 +48,14 @@ parser code {:
 
         // Agregar el error a la lista con el nuevo comentario
         syntaxErrors.add(new SyntaxError(s.left, s.right, unexpectedToken, comentario));
+
+        // Agregar mensaje de error al OutputManager
+        outputManager.addErrorOutput(message);
     }
 
     public void unrecovered_syntax_error(Symbol s) {
         String message = "Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value;
-        System.err.println(message);
+        outputManager.addErrorOutput(message);
         syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Unrecovered Syntax Error")); 
     }
 
@@ -50,7 +63,7 @@ parser code {:
         Set<Character> conjunto = conjuntoManager.obtenerConjunto(nombre);
         if (conjunto == null) {
             String message = "Error: El conjunto '" + nombre + "' no está definido.";
-            System.err.println(message);
+            outputManager.addOutput(message);
             syntaxErrors.add(new SyntaxError(0, 0, nombre, "Conjunto No Definido"));
             return Collections.emptySet(); // Retornar conjunto vacío como medida de recuperación
         }
@@ -149,9 +162,10 @@ non terminal Sentencias;
 non terminal Sentencia;
 non terminal DefinicionConjunto;
 non terminal DefinicionOperacion;
-non terminal List<String> OperacionTokens;  // Cambiar Nodo a List<String>
+non terminal List<String> OperacionTokens;  
 non terminal Evaluacion;
 non terminal Set<Character> Conjunto;
+non terminal Set<Character> Rango;
 
 // El programa empieza con un bloque delimitado por llaves
 start with Programa;
@@ -182,68 +196,52 @@ Sentencia ::= DefinicionConjunto
 
 // Producción para definir un conjunto
 DefinicionConjunto ::= CONJ:conj DOSPUNTOS:dosp ID:id FLECHA:flecha Conjunto:conjSet PUNTOYCOMA:punto
-    {: 
+    {:
         conjuntoManager.definirConjunto(id, conjSet);
         System.out.println("Definido conjunto: " + id);
         System.out.println("Conjunto contenido: " + conjSet);
     :};
 
 // Producción para manejar las diferentes notaciones de conjunto
-Conjunto ::= CONJUNTO:conj1 HASTA:hasta CONJUNTO:conj2
-    {: 
+Conjunto ::= Rango:rangos
+    {:
+        RESULT = rangos;
+    :}
+    | CONJUNTO:conjList
+    {:
+        RESULT = conjuntoManager.generarConjuntoDesdeLista(conjList);
+        System.out.println("Generando conjunto desde lista: " + conjList);
+        System.out.println("Conjunto generado: " + RESULT);
+    :};
+
+// Subproducción para manejar rangos
+Rango ::= CONJUNTO:conj1 HASTA:hasta CONJUNTO:conj2
+    {:
         RESULT = conjuntoManager.generarConjuntoDesdeRango(conj1, conj2);
         System.out.println("Generando conjunto desde rango: " + conj1 + " hasta " + conj2);
-        System.out.println("Conjunto generado: " + RESULT);
-    :}
-    | CONJUNTO:conj1 COMA Conjunto:resto
-    {: 
-        Set<Character> conjunto = new HashSet<>();
-        conjunto.add(conj1.charAt(0));  // Añadir el primer elemento
-        conjunto.addAll(resto);  // Añadir el resto de los elementos
-        RESULT = conjunto;
-        System.out.println("Generando conjunto desde lista: " + conj1 + ", " + resto);
-        System.out.println("Conjunto generado: " + RESULT);
-    :}
-    | CONJUNTO:conj1
-    {: 
-        Set<Character> conjunto = new HashSet<>();
-        conjunto.add(conj1.charAt(0));
-        RESULT = conjunto;
-        System.out.println("Generando conjunto desde un solo elemento: " + conj1);
         System.out.println("Conjunto generado: " + RESULT);
     :};
 
 DefinicionOperacion ::= OPERA:opera DOSPUNTOS:dosp ID:id FLECHA:flecha OperacionTokens:tokens PUNTOYCOMA:punto
 {:
     try {
-        // Crear instancia de ArbolPrefijo con el conjuntoManager
-        ArbolPrefijo arbolBuilder = new ArbolPrefijo(conjuntoManager);
-
-        // Construir el árbol de acuerdo a los tokens prefijos
-        Nodo arbol = arbolBuilder.construirArbol(tokens);
-
-        // Integrar el simplificador
-        SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
+        Nodo arbol = arbolPrefijo.construirArbol(tokens);
         Nodo arbolSimplificado = simplificador.simplificar(arbol, id);
-
         Set<Character> resultado = arbolSimplificado.evaluar();
         conjuntoManager.guardarOperacion(id, arbolSimplificado.mostrarContenido(), resultado);
-
         System.out.println("Operación '" + id + "' simplificada y guardada.");
         System.out.println("Árbol de operación simplificada: " + arbolSimplificado);
         System.out.println("Resultado de la operación: " + resultado);
-
-// Generar archivo JSON con el resultado de la simplificación
-            simplificador.generarJSON("./src/Salidas/operaciones_simplificadas.json");
-            System.out.println("Archivo JSON de operaciones simplificadas generado.");
+        System.out.println("------------------------------------");
+        System.out.println(conjuntoManager.getOperaciones());
 
     } catch (Exception e) {
         String message = "Error al definir operación '" + id + "': " + e.getMessage();
         System.err.println(message);
+        outputManager.addErrorOutput(message);
         syntaxErrors.add(new SyntaxError(operaleft, puntoright, e.getMessage(), "Error en la Definición de Operación"));
     }
 :};
-
 
 OperacionTokens ::= DIFERENCIA:dif OperacionTokens:op1 OperacionTokens:op2
 {:
@@ -294,33 +292,29 @@ Evaluacion ::= EVALUAR PAR_IZQ  ELEMENTOS_EVALUAR: elementos COMA ID:id PAR_DER 
 {:
     // Extraer los elementos de ELEMENTOS_EVALUAR (vienen en la forma "{a, b, c}")
     String elementosStr = elementos;
-    
-    // Quitar las llaves '{' y '}' y luego separar los elementos por la coma ','
-    elementosStr = elementosStr.substring(1, elementosStr.length() - 1);  // Remueve '{' y '}'
-    String[] elementosArray = elementosStr.split(",\\s*");  // Divide por coma y opcionalmente espacios
-
+    elementosStr = elementosStr.substring(1, elementosStr.length() - 1); 
+    String[] elementosArray = elementosStr.split(",\\s*"); 
     Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
-
     // Verificar si la operación existe
     if (resultadoOperacion == null) {
         System.err.println("Operación no encontrada: " + id);
+        outputManager.addErrorOutput("Operación no encontrada: " + id);
         syntaxErrors.add(new SyntaxError(elementosleft, idright, "Operación no encontrada: " + id, "Error en la Evaluación"));
     }
-
     // Evaluar cada elemento contra la operación
-    System.out.println("===============");
-    System.out.println("Evaluar: " + id);
-    System.out.println("===============");
+    outputManager.addOutput("===============");
+    outputManager.addOutput("Evaluar: " + id);
+    outputManager.addOutput("===============");
 
     for (String elemento : elementosArray) {
         elemento = elemento.trim();  // Remueve cualquier espacio alrededor del elemento
         if (resultadoOperacion.contains(elemento.charAt(0))) {
-            System.out.println(elemento + " -> exitoso");
+            outputManager.addOutput(elemento + " -> exitoso");
         } else {
-            System.out.println(elemento + " -> fallo");
+            outputManager.addOutput(elemento + " -> fallo");
         }
     }
-    System.out.println("===============");
+    outputManager.addOutput("===============");
 :};
 
 

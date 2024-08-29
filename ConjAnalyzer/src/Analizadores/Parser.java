@@ -11,6 +11,7 @@ import Conjuntos.ConjuntoManager;
 import Arbol.*;
 import Arbol.SimplificadorOperaciones;
 import Componentes.SyntaxError;
+import Interfaz.OutputManager;
 import java.util.Stack;
 import java_cup.runtime.XMLElement;
 
@@ -40,8 +41,8 @@ public class Parser extends java_cup.runtime.lr_parser {
     "\000\024\000\002\002\004\000\002\002\005\000\002\003" +
     "\004\000\002\003\002\000\002\004\003\000\002\004\003" +
     "\000\002\004\003\000\002\004\003\000\002\004\004\000" +
-    "\002\005\010\000\002\011\005\000\002\011\005\000\002" +
-    "\011\003\000\002\006\010\000\002\007\005\000\002\007" +
+    "\002\005\010\000\002\011\003\000\002\011\003\000\002" +
+    "\012\005\000\002\006\010\000\002\007\005\000\002\007" +
     "\005\000\002\007\005\000\002\007\004\000\002\007\005" +
     "\000\002\010\011" });
 
@@ -51,50 +52,50 @@ public class Parser extends java_cup.runtime.lr_parser {
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\064\000\004\004\005\001\002\000\004\002\066\001" +
-    "\002\000\016\003\015\005\ufffe\022\010\024\006\025\020" +
-    "\026\011\001\002\000\004\006\061\001\002\000\016\003" +
-    "\015\005\ufffe\022\010\024\006\025\020\026\011\001\002" +
-    "\000\024\003\ufff5\005\ufff5\010\ufff5\017\054\020\055\022" +
-    "\ufff5\024\ufff5\025\ufff5\026\ufff5\001\002\000\004\015\046" +
-    "\001\002\000\016\003\ufffb\005\ufffb\022\ufffb\024\ufffb\025" +
-    "\ufffb\026\ufffb\001\002\000\016\003\ufffd\005\ufffd\022\ufffd" +
-    "\024\ufffd\025\ufffd\026\ufffd\001\002\000\016\003\ufffc\005" +
-    "\ufffc\022\ufffc\024\ufffc\025\ufffc\026\ufffc\001\002\000\004" +
-    "\010\045\001\002\000\004\005\044\001\002\000\016\003" +
-    "\ufffa\005\ufffa\022\ufffa\024\ufffa\025\ufffa\026\ufffa\001\002" +
-    "\000\004\006\021\001\002\000\004\021\022\001\002\000" +
-    "\004\007\023\001\002\000\014\004\030\011\027\012\025" +
-    "\013\026\014\031\001\002\000\004\010\043\001\002\000" +
-    "\014\004\030\011\027\012\025\013\026\014\031\001\002" +
-    "\000\014\004\030\011\027\012\025\013\026\014\031\001" +
-    "\002\000\014\004\030\011\027\012\025\013\026\014\031" +
-    "\001\002\000\004\021\033\001\002\000\014\004\030\011" +
-    "\027\012\025\013\026\014\031\001\002\000\016\004\ufff0" +
-    "\010\ufff0\011\ufff0\012\ufff0\013\ufff0\014\ufff0\001\002\000" +
-    "\004\005\034\001\002\000\016\004\uffef\010\uffef\011\uffef" +
-    "\012\uffef\013\uffef\014\uffef\001\002\000\014\004\030\011" +
-    "\027\012\025\013\026\014\031\001\002\000\016\004\ufff2" +
-    "\010\ufff2\011\ufff2\012\ufff2\013\ufff2\014\ufff2\001\002\000" +
-    "\014\004\030\011\027\012\025\013\026\014\031\001\002" +
-    "\000\016\004\ufff3\010\ufff3\011\ufff3\012\ufff3\013\ufff3\014" +
-    "\ufff3\001\002\000\014\004\030\011\027\012\025\013\026" +
-    "\014\031\001\002\000\016\004\ufff1\010\ufff1\011\ufff1\012" +
-    "\ufff1\013\ufff1\014\ufff1\001\002\000\016\003\ufff4\005\ufff4" +
-    "\022\ufff4\024\ufff4\025\ufff4\026\ufff4\001\002\000\004\002" +
-    "\000\001\002\000\016\003\ufff9\005\ufff9\022\ufff9\024\ufff9" +
-    "\025\ufff9\026\ufff9\001\002\000\004\023\047\001\002\000" +
-    "\004\017\050\001\002\000\004\021\051\001\002\000\004" +
-    "\016\052\001\002\000\004\010\053\001\002\000\016\003" +
-    "\uffee\005\uffee\022\uffee\024\uffee\025\uffee\026\uffee\001\002" +
-    "\000\004\022\010\001\002\000\004\022\056\001\002\000" +
-    "\020\003\ufff7\005\ufff7\010\ufff7\022\ufff7\024\ufff7\025\ufff7" +
-    "\026\ufff7\001\002\000\020\003\ufff6\005\ufff6\010\ufff6\022" +
-    "\ufff6\024\ufff6\025\ufff6\026\ufff6\001\002\000\004\005\uffff" +
-    "\001\002\000\004\021\062\001\002\000\004\007\063\001" +
-    "\002\000\004\022\010\001\002\000\004\010\065\001\002" +
-    "\000\016\003\ufff8\005\ufff8\022\ufff8\024\ufff8\025\ufff8\026" +
-    "\ufff8\001\002\000\004\002\001\001\002" });
+    "\000\063\000\004\004\005\001\002\000\004\002\065\001" +
+    "\002\000\016\003\015\005\ufffe\022\010\024\006\025\021" +
+    "\026\011\001\002\000\004\006\060\001\002\000\016\003" +
+    "\015\005\ufffe\022\010\024\006\025\021\026\011\001\002" +
+    "\000\022\003\ufff6\005\ufff6\010\ufff6\020\055\022\ufff6\024" +
+    "\ufff6\025\ufff6\026\ufff6\001\002\000\004\015\047\001\002" +
+    "\000\016\003\ufffb\005\ufffb\022\ufffb\024\ufffb\025\ufffb\026" +
+    "\ufffb\001\002\000\016\003\ufffd\005\ufffd\022\ufffd\024\ufffd" +
+    "\025\ufffd\026\ufffd\001\002\000\016\003\ufffc\005\ufffc\022" +
+    "\ufffc\024\ufffc\025\ufffc\026\ufffc\001\002\000\004\010\046" +
+    "\001\002\000\004\005\045\001\002\000\020\003\ufff7\005" +
+    "\ufff7\010\ufff7\022\ufff7\024\ufff7\025\ufff7\026\ufff7\001\002" +
+    "\000\016\003\ufffa\005\ufffa\022\ufffa\024\ufffa\025\ufffa\026" +
+    "\ufffa\001\002\000\004\006\022\001\002\000\004\021\023" +
+    "\001\002\000\004\007\024\001\002\000\014\004\031\011" +
+    "\030\012\026\013\027\014\032\001\002\000\004\010\044" +
+    "\001\002\000\014\004\031\011\030\012\026\013\027\014" +
+    "\032\001\002\000\014\004\031\011\030\012\026\013\027" +
+    "\014\032\001\002\000\014\004\031\011\030\012\026\013" +
+    "\027\014\032\001\002\000\004\021\034\001\002\000\014" +
+    "\004\031\011\030\012\026\013\027\014\032\001\002\000" +
+    "\016\004\ufff0\010\ufff0\011\ufff0\012\ufff0\013\ufff0\014\ufff0" +
+    "\001\002\000\004\005\035\001\002\000\016\004\uffef\010" +
+    "\uffef\011\uffef\012\uffef\013\uffef\014\uffef\001\002\000\014" +
+    "\004\031\011\030\012\026\013\027\014\032\001\002\000" +
+    "\016\004\ufff2\010\ufff2\011\ufff2\012\ufff2\013\ufff2\014\ufff2" +
+    "\001\002\000\014\004\031\011\030\012\026\013\027\014" +
+    "\032\001\002\000\016\004\ufff3\010\ufff3\011\ufff3\012\ufff3" +
+    "\013\ufff3\014\ufff3\001\002\000\014\004\031\011\030\012" +
+    "\026\013\027\014\032\001\002\000\016\004\ufff1\010\ufff1" +
+    "\011\ufff1\012\ufff1\013\ufff1\014\ufff1\001\002\000\016\003" +
+    "\ufff4\005\ufff4\022\ufff4\024\ufff4\025\ufff4\026\ufff4\001\002" +
+    "\000\004\002\000\001\002\000\016\003\ufff9\005\ufff9\022" +
+    "\ufff9\024\ufff9\025\ufff9\026\ufff9\001\002\000\004\023\050" +
+    "\001\002\000\004\017\051\001\002\000\004\021\052\001" +
+    "\002\000\004\016\053\001\002\000\004\010\054\001\002" +
+    "\000\016\003\uffee\005\uffee\022\uffee\024\uffee\025\uffee\026" +
+    "\uffee\001\002\000\004\022\056\001\002\000\020\003\ufff5" +
+    "\005\ufff5\010\ufff5\022\ufff5\024\ufff5\025\ufff5\026\ufff5\001" +
+    "\002\000\004\005\uffff\001\002\000\004\021\061\001\002" +
+    "\000\004\007\062\001\002\000\004\022\010\001\002\000" +
+    "\004\010\064\001\002\000\016\003\ufff8\005\ufff8\022\ufff8" +
+    "\024\ufff8\025\ufff8\026\ufff8\001\002\000\004\002\001\001" +
+    "\002" });
 
   /** Access to parse-action table. */
   public short[][] action_table() {return _action_table;}
@@ -102,25 +103,25 @@ public class Parser extends java_cup.runtime.lr_parser {
   /** <code>reduce_goto</code> table. */
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
-    "\000\064\000\004\002\003\001\001\000\002\001\001\000" +
-    "\016\003\015\004\006\005\012\006\013\010\011\011\016" +
-    "\001\001\000\002\001\001\000\016\003\057\004\006\005" +
-    "\012\006\013\010\011\011\016\001\001\000\002\001\001" +
+    "\000\063\000\004\002\003\001\001\000\002\001\001\000" +
+    "\020\003\015\004\006\005\012\006\013\010\011\011\017" +
+    "\012\016\001\001\000\002\001\001\000\020\003\056\004" +
+    "\006\005\012\006\013\010\011\011\017\012\016\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\004\007\023\001\001\000\002\001\001\000\004" +
-    "\007\040\001\001\000\004\007\036\001\001\000\004\007" +
-    "\034\001\001\000\002\001\001\000\004\007\031\001\001" +
-    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
-    "\004\007\035\001\001\000\002\001\001\000\004\007\037" +
+    "\001\000\002\001\001\000\002\001\001\000\004\007\024" +
     "\001\001\000\002\001\001\000\004\007\041\001\001\000" +
-    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\004\007\037\001\001\000\004\007\035\001\001\000\002" +
+    "\001\001\000\004\007\032\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001\000\004\007\036\001\001" +
+    "\000\002\001\001\000\004\007\040\001\001\000\002\001" +
+    "\001\000\004\007\042\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
-    "\000\004\011\056\001\001\000\002\001\001\000\002\001" +
-    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
-    "\000\002\001\001\000\004\011\063\001\001\000\002\001" +
+    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\006\011\062\012\016\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001" });
 
   /** Access to <code>reduce_goto</code> table. */
@@ -160,13 +161,22 @@ public class Parser extends java_cup.runtime.lr_parser {
 
 
 
-    private List<SyntaxError> syntaxErrors = new ArrayList<>(); // Lista para almacenar errores sintácticos
+        private List<SyntaxError> syntaxErrors = new ArrayList<>();
+        private OutputManager outputManager;
+        private ConjuntoManager conjuntoManager;
+        private SimplificadorOperaciones simplificador;
+        private ArbolPrefijo arbolPrefijo;
 
-    ConjuntoManager conjuntoManager = new ConjuntoManager();
-    SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
-    ArbolPrefijo arbolPrefijo = new ArbolPrefijo(conjuntoManager);
+        public Parser(AnalizadorLexico lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolPrefijo arbolPrefijo) {
+            super(lexer);
+            this.outputManager = outputManager;
+            this.conjuntoManager = conjuntoManager;  
+            this.simplificador = simplificador;
+            this.arbolPrefijo = arbolPrefijo; 
+            this.init_actions(); 
+        }
 
-    public void syntax_error(Symbol s) {
+   public void syntax_error(Symbol s) {
         // Obtener los IDs de los tokens esperados
         List<Integer> expected = expected_token_ids();
         StringBuilder expectedTokens = new StringBuilder();
@@ -189,11 +199,14 @@ public class Parser extends java_cup.runtime.lr_parser {
 
         // Agregar el error a la lista con el nuevo comentario
         syntaxErrors.add(new SyntaxError(s.left, s.right, unexpectedToken, comentario));
+
+        // Agregar mensaje de error al OutputManager
+        outputManager.addErrorOutput(message);
     }
 
     public void unrecovered_syntax_error(Symbol s) {
         String message = "Unrecovered Syntax Error at line " + s.left + ", column " + s.right + ": " + s.value;
-        System.err.println(message);
+        outputManager.addErrorOutput(message);
         syntaxErrors.add(new SyntaxError(s.left, s.right, s.value, "Unrecovered Syntax Error")); 
     }
 
@@ -201,7 +214,7 @@ public class Parser extends java_cup.runtime.lr_parser {
         Set<Character> conjunto = conjuntoManager.obtenerConjunto(nombre);
         if (conjunto == null) {
             String message = "Error: El conjunto '" + nombre + "' no está definido.";
-            System.err.println(message);
+            outputManager.addOutput(message);
             syntaxErrors.add(new SyntaxError(0, 0, nombre, "Conjunto No Definido"));
             return Collections.emptySet(); // Retornar conjunto vacío como medida de recuperación
         }
@@ -434,7 +447,7 @@ class CUP$Parser$actions {
 		int puntoleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int puntoright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object punto = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 
+		
         conjuntoManager.definirConjunto(id, conjSet);
         System.out.println("Definido conjunto: " + id);
         System.out.println("Conjunto contenido: " + conjSet);
@@ -444,7 +457,37 @@ class CUP$Parser$actions {
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 10: // Conjunto ::= CONJUNTO HASTA CONJUNTO 
+          case 10: // Conjunto ::= Rango 
+            {
+              Set<Character> RESULT =null;
+		int rangosleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int rangosright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Set<Character> rangos = (Set<Character>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        RESULT = rangos;
+    
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Conjunto",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
+            }
+          return CUP$Parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 11: // Conjunto ::= CONJUNTO 
+            {
+              Set<Character> RESULT =null;
+		int conjListleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int conjListright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		String conjList = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        RESULT = conjuntoManager.generarConjuntoDesdeLista(conjList);
+        System.out.println("Generando conjunto desde lista: " + conjList);
+        System.out.println("Conjunto generado: " + RESULT);
+    
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Conjunto",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
+            }
+          return CUP$Parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 12: // Rango ::= CONJUNTO HASTA CONJUNTO 
             {
               Set<Character> RESULT =null;
 		int conj1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
@@ -456,52 +499,12 @@ class CUP$Parser$actions {
 		int conj2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int conj2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String conj2 = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 
+		
         RESULT = conjuntoManager.generarConjuntoDesdeRango(conj1, conj2);
         System.out.println("Generando conjunto desde rango: " + conj1 + " hasta " + conj2);
         System.out.println("Conjunto generado: " + RESULT);
     
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Conjunto",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
-            }
-          return CUP$Parser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 11: // Conjunto ::= CONJUNTO COMA Conjunto 
-            {
-              Set<Character> RESULT =null;
-		int conj1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
-		int conj1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
-		String conj1 = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
-		int restoleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int restoright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Set<Character> resto = (Set<Character>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 
-        Set<Character> conjunto = new HashSet<>();
-        conjunto.add(conj1.charAt(0));  // Añadir el primer elemento
-        conjunto.addAll(resto);  // Añadir el resto de los elementos
-        RESULT = conjunto;
-        System.out.println("Generando conjunto desde lista: " + conj1 + ", " + resto);
-        System.out.println("Conjunto generado: " + RESULT);
-    
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Conjunto",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
-            }
-          return CUP$Parser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 12: // Conjunto ::= CONJUNTO 
-            {
-              Set<Character> RESULT =null;
-		int conj1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int conj1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		String conj1 = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 
-        Set<Character> conjunto = new HashSet<>();
-        conjunto.add(conj1.charAt(0));
-        RESULT = conjunto;
-        System.out.println("Generando conjunto desde un solo elemento: " + conj1);
-        System.out.println("Conjunto generado: " + RESULT);
-    
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Conjunto",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("Rango",8, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
@@ -529,30 +532,20 @@ class CUP$Parser$actions {
 		Object punto = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
     try {
-        // Crear instancia de ArbolPrefijo con el conjuntoManager
-        ArbolPrefijo arbolBuilder = new ArbolPrefijo(conjuntoManager);
-
-        // Construir el árbol de acuerdo a los tokens prefijos
-        Nodo arbol = arbolBuilder.construirArbol(tokens);
-
-        // Integrar el simplificador
-        SimplificadorOperaciones simplificador = new SimplificadorOperaciones(conjuntoManager);
+        Nodo arbol = arbolPrefijo.construirArbol(tokens);
         Nodo arbolSimplificado = simplificador.simplificar(arbol, id);
-
         Set<Character> resultado = arbolSimplificado.evaluar();
         conjuntoManager.guardarOperacion(id, arbolSimplificado.mostrarContenido(), resultado);
-
         System.out.println("Operación '" + id + "' simplificada y guardada.");
         System.out.println("Árbol de operación simplificada: " + arbolSimplificado);
         System.out.println("Resultado de la operación: " + resultado);
-
-// Generar archivo JSON con el resultado de la simplificación
-            simplificador.generarJSON("./src/Salidas/operaciones_simplificadas.json");
-            System.out.println("Archivo JSON de operaciones simplificadas generado.");
+        System.out.println("------------------------------------");
+        System.out.println(conjuntoManager.getOperaciones());
 
     } catch (Exception e) {
         String message = "Error al definir operación '" + id + "': " + e.getMessage();
         System.err.println(message);
+        outputManager.addErrorOutput(message);
         syntaxErrors.add(new SyntaxError(operaleft, puntoright, e.getMessage(), "Error en la Definición de Operación"));
     }
 
@@ -689,33 +682,29 @@ class CUP$Parser$actions {
 		
     // Extraer los elementos de ELEMENTOS_EVALUAR (vienen en la forma "{a, b, c}")
     String elementosStr = elementos;
-    
-    // Quitar las llaves '{' y '}' y luego separar los elementos por la coma ','
-    elementosStr = elementosStr.substring(1, elementosStr.length() - 1);  // Remueve '{' y '}'
-    String[] elementosArray = elementosStr.split(",\\s*");  // Divide por coma y opcionalmente espacios
-
+    elementosStr = elementosStr.substring(1, elementosStr.length() - 1); 
+    String[] elementosArray = elementosStr.split(",\\s*"); 
     Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
-
     // Verificar si la operación existe
     if (resultadoOperacion == null) {
         System.err.println("Operación no encontrada: " + id);
+        outputManager.addErrorOutput("Operación no encontrada: " + id);
         syntaxErrors.add(new SyntaxError(elementosleft, idright, "Operación no encontrada: " + id, "Error en la Evaluación"));
     }
-
     // Evaluar cada elemento contra la operación
-    System.out.println("===============");
-    System.out.println("Evaluar: " + id);
-    System.out.println("===============");
+    outputManager.addOutput("===============");
+    outputManager.addOutput("Evaluar: " + id);
+    outputManager.addOutput("===============");
 
     for (String elemento : elementosArray) {
         elemento = elemento.trim();  // Remueve cualquier espacio alrededor del elemento
         if (resultadoOperacion.contains(elemento.charAt(0))) {
-            System.out.println(elemento + " -> exitoso");
+            outputManager.addOutput(elemento + " -> exitoso");
         } else {
-            System.out.println(elemento + " -> fallo");
+            outputManager.addOutput(elemento + " -> fallo");
         }
     }
-    System.out.println("===============");
+    outputManager.addOutput("===============");
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("Evaluacion",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
