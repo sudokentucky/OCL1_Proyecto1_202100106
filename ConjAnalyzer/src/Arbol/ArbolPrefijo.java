@@ -44,14 +44,24 @@ public class ArbolPrefijo {
         String token = iteradorTokens.next(); // Extraer el siguiente token
 
         switch (token) {
-            case "U":
-            case "&":
             case "-":
-                // Operadores binarios: construir subárbol izquierdo y derecho
-                Nodo izquierdo = construirNodo(iteradorTokens);
-                Nodo derecho = construirNodo(iteradorTokens);
-                return new NodoOperacion(token, izquierdo, derecho);
-
+                // Operador de diferencia binaria: construir el nodo derecho primero
+                Nodo operandoIzquierdo = construirNodo(iteradorTokens);
+                Nodo operandoDerecho = construirNodo(iteradorTokens);
+                return new NodoOperacion(token, operandoIzquierdo, operandoDerecho);
+            
+            case "&":
+                // Operador binario: construir subárbol izquierdo y derecho
+                Nodo izquierdoAnd = construirNodo(iteradorTokens);
+                Nodo derechoAnd = construirNodo(iteradorTokens);
+                return new NodoOperacion(token, izquierdoAnd, derechoAnd);
+                
+            case "U":
+                // Operador binario: construir subárbol izquierdo y derecho
+                Nodo izquierdoU = construirNodo(iteradorTokens);
+                Nodo derechoU = construirNodo(iteradorTokens);
+                return new NodoOperacion(token, izquierdoU, derechoU);
+    
             case "^":
                 // Operador unario: construir subárbol izquierdo
                 Nodo operand = construirNodo(iteradorTokens);
