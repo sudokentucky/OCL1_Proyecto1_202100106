@@ -3,20 +3,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Arbol;
-
 import Conjuntos.GestorOperaciones;
+import java.util.List;
 import java.util.Set;
-
 /**
  *
  * @author Keneth Lopez
  */
-public class NodoOperacion extends Nodo {
+public class NodoBinario extends Nodo { 
     private String operador;
     private Nodo izquierdo;
     private Nodo derecho;
 
-    public NodoOperacion(String operador, Nodo izquierdo, Nodo derecho) {
+    public NodoBinario(String operador, Nodo izquierdo, Nodo derecho) {
         this.operador = operador;
         this.izquierdo = izquierdo;
         this.derecho = derecho;
@@ -25,7 +24,7 @@ public class NodoOperacion extends Nodo {
     @Override
     public Set<Character> evaluar() {
         Set<Character> resultadoIzquierdo = izquierdo.evaluar();
-        Set<Character> resultadoDerecho = derecho != null ? derecho.evaluar() : null;
+        Set<Character> resultadoDerecho = derecho.evaluar();
 
         switch (operador) {
             case "U":
@@ -34,30 +33,15 @@ public class NodoOperacion extends Nodo {
                 return GestorOperaciones.interseccion(resultadoIzquierdo, resultadoDerecho);
             case "-":
                 return GestorOperaciones.diferencia(resultadoIzquierdo, resultadoDerecho);
-            case "^":
-                return GestorOperaciones.complemento(resultadoIzquierdo);
             default:
-                throw new IllegalArgumentException("Operador desconocido: " + operador);
+                throw new IllegalArgumentException("Operador binario desconocido: " + operador);
         }
     }
+  
 
     @Override
     public String mostrarContenido() {
-        String contenidoIzquierdo = izquierdo.mostrarContenido();
-        String contenidoDerecho = derecho != null ? derecho.mostrarContenido() : "";
-
-        switch (operador) {
-            case "U":
-                return "(" + contenidoIzquierdo + " U " + contenidoDerecho + ")";
-            case "&":
-                return "(" + contenidoIzquierdo + " & " + contenidoDerecho + ")";
-            case "-":
-                return "(" + contenidoIzquierdo + " - " + contenidoDerecho + ")";
-            case "^":
-                return "^" + contenidoIzquierdo;
-            default:
-                throw new IllegalArgumentException("Operador desconocido: " + operador);
-        }
+        return "(" + izquierdo.mostrarContenido() + " " + operador + " " + derecho.mostrarContenido() + ")";
     }
 
     @Override
