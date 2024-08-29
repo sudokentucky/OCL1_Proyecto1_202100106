@@ -79,7 +79,8 @@ BLANCOS = [ \t\r]+
 SALTOLINEA = \n
 CARACTER = [^\r\n]
 COM_LINEA = "#"{CARACTER}* {SALTOLINEA}?
-COM_MULTI = "<!"([^])*? "!>"
+COM_MULTI = "<!" [^!] ~"!>" | "<!" "!"+ ">"
+
 
 %%
 
@@ -100,7 +101,6 @@ COM_MULTI = "<!"([^])*? "!>"
 {DIFERENCIA} { addToken("DIFERENCIA", yytext(), yyline, yycolumn); return new Symbol(sym.DIFERENCIA, yyline, yycolumn, yytext()); }
 {COMPLEMENTO} { addToken("COMPLEMENTO", yytext(), yyline, yycolumn); return new Symbol(sym.COMPLEMENTO, yyline, yycolumn, yytext()); }
 {HASTA} { addToken("HASTA", yytext(), yyline, yycolumn); return new Symbol(sym.HASTA, yyline, yycolumn, yytext()); }
-{ID} { addToken("ID", yytext(), yyline, yycolumn); return new Symbol(sym.ID, yyline, yycolumn, yytext()); }
 // Símbolos y operadores
 {DOSPUNTOS} { addToken("DOSPUNTOS", yytext(), yyline, yycolumn); return new Symbol(sym.DOSPUNTOS, yyline, yycolumn, yytext()); }
 {LLAVE_IZQ} { addToken("LLAVE_IZQ", yytext(), yyline, yycolumn); return new Symbol(sym.LLAVE_IZQ, yyline, yycolumn, yytext()); }
@@ -121,6 +121,9 @@ COM_MULTI = "<!"([^])*? "!>"
     addToken("CONJUNTO", yytext(), yyline, yycolumn); 
     return new Symbol(sym.CONJUNTO, yyline, yycolumn, yytext());
 }
+
+{ID} { addToken("ID", yytext(), yyline, yycolumn); return new Symbol(sym.ID, yyline, yycolumn, yytext()); }
+
 
 {NO_UNIVERSO} { addError(yytext(), "Error Léxico", yyline, yycolumn);
     return new Symbol(sym.error, yyline, yycolumn, yytext()); }
