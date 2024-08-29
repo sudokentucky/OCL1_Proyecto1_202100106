@@ -16,75 +16,48 @@ public class ArbolPrefijo {
         this.conjuntoManager = conjuntoManager;
     }
 
-    /**
-     * Construir el árbol desde una lista de tokens en notación prefija
-     * @param tokens Lista de tokens en notación prefija
-     * @return Nodo raíz del árbol construido
-     * @throws Exception Si ocurre un error en la construcción del árbol
-     */
     public Nodo construirArbol(List<String> tokens) throws Exception {
         Iterator<String> iteradorTokens = tokens.iterator();
         Nodo arbol = construirNodo(iteradorTokens);
-        // Llamar al método para imprimir la expresión prefija después de construir el árbol
         imprimirExpresionPrefija(arbol);
         return arbol;
     }
 
-    /**
-     * Método recursivo para construir un nodo a partir del iterador de tokens
-     * @param iteradorTokens Iterador de tokens en notación prefija
-     * @return Nodo construido
-     * @throws Exception Si ocurre un error en la construcción del nodo
-     */
     private Nodo construirNodo(Iterator<String> iteradorTokens) throws Exception {
         if (!iteradorTokens.hasNext()) {
             throw new Exception("No hay más tokens disponibles para construir el árbol.");
         }
 
-        String token = iteradorTokens.next(); // Extraer el siguiente token
-
+        String token = iteradorTokens.next();
         switch (token) {
             case "-":
-                // Operador de diferencia binaria: construir el nodo derecho primero
+            case "&":
+            case "U": {
+                // Operador binario: construir subárbol izquierdo y derecho
                 Nodo operandoIzquierdo = construirNodo(iteradorTokens);
                 Nodo operandoDerecho = construirNodo(iteradorTokens);
-                return new NodoOperacion(token, operandoIzquierdo, operandoDerecho);
-            
-            case "&":
-                // Operador binario: construir subárbol izquierdo y derecho
-                Nodo izquierdoAnd = construirNodo(iteradorTokens);
-                Nodo derechoAnd = construirNodo(iteradorTokens);
-                return new NodoOperacion(token, izquierdoAnd, derechoAnd);
-                
-            case "U":
-                // Operador binario: construir subárbol izquierdo y derecho
-                Nodo izquierdoU = construirNodo(iteradorTokens);
-                Nodo derechoU = construirNodo(iteradorTokens);
-                return new NodoOperacion(token, izquierdoU, derechoU);
-    
-            case "^":
+                return new NodoBinario(token, operandoIzquierdo, operandoDerecho);
+            }
+            case "^": {
                 // Operador unario: construir subárbol izquierdo
-                Nodo operand = construirNodo(iteradorTokens);
-                return new NodoOperacion(token, operand, null);
-
+                Nodo operando = construirNodo(iteradorTokens);
+                return new NodoUnario(token, operando);
+            }
             default:
-                // Token de conjunto
                 return new NodoConjunto(token, conjuntoManager);
         }
     }
 
-    /**
-     * Método para imprimir la expresión en notación prefija del árbol
-     * @param nodo Nodo raíz del árbol a imprimir
-     */
     private void imprimirExpresionPrefija(Nodo nodo) {
-        if (nodo instanceof NodoOperacion) {
-            NodoOperacion operacion = (NodoOperacion) nodo;
+        if (nodo instanceof NodoBinario) {
+            NodoBinario operacion = (NodoBinario) nodo;
             System.out.print(operacion.getOperador() + " ");
             imprimirExpresionPrefija(operacion.getIzquierdo());
-            if (operacion.getDerecho() != null) {
-                imprimirExpresionPrefija(operacion.getDerecho());
-            }
+            imprimirExpresionPrefija(operacion.getDerecho());
+        } else if (nodo instanceof NodoUnario) {
+            NodoUnario operacion = (NodoUnario) nodo;
+            System.out.print(operacion.getOperador() + " ");
+            imprimirExpresionPrefija(operacion.getOperand());
         } else if (nodo instanceof NodoConjunto) {
             NodoConjunto conjunto = (NodoConjunto) nodo;
             System.out.print(conjunto.getNombreConjunto() + " ");
