@@ -52,11 +52,13 @@ public class ConjuntoManager {
     }
 
     // Generar un conjunto a partir de una lista explícita de elementos
-    public Set<Character> generarConjuntoDesdeLista(String... elementos) {
+    public Set<Character> generarConjuntoDesdeLista(String elementos) {
         Set<Character> conjunto = new HashSet<>();
-        for (String elemento : elementos) {
-            for (char c : elemento.toCharArray()) {
-                conjunto.add(c);
+        // Divide la cadena por comas y elimina espacios en blanco
+        String[] caracteres = elementos.split(",\\s*");
+        for (String charStr : caracteres) {
+            if (!charStr.isEmpty()) {
+                conjunto.add(charStr.charAt(0));  // Añadir cada carácter al conjunto
             }
         }
         return conjunto;
@@ -71,10 +73,10 @@ public class ConjuntoManager {
     public Set<Character> obtenerConjunto(String nombre) {
         return conjuntos.get(nombre);
     }
-
     // Guardar una operación realizada junto con su nombre, notación y conjunto resultante
     public void guardarOperacion(String nombreOperacion, String notacion, Set<Character> conjuntoResultante) {
         operaciones.put(nombreOperacion, new Operacion(notacion, conjuntoResultante));
+        System.out.println("Operación guardada: " + nombreOperacion + " - Notación: " + notacion);
     }
 
     // Obtener la notación de una operación
@@ -87,35 +89,6 @@ public class ConjuntoManager {
     public Set<Character> obtenerResultadoOperacion(String nombreOperacion) {
         Operacion operacion = operaciones.get(nombreOperacion);
         return operacion != null ? operacion.getConjuntoResultante() : null;
-    }
-
-    // Evaluar un conjunto contra el resultado de una operación
-    public void evaluarConjunto(Set<Character> conjuntoAEvaluar, String nombreOperacion) {
-        Set<Character> conjuntoResultante = obtenerResultadoOperacion(nombreOperacion);
-        if (conjuntoResultante == null) {
-            System.out.println("Operación " + nombreOperacion + " no encontrada.");
-            return;
-        }
-
-        System.out.println("===============\nEvaluar: " + nombreOperacion + "\n===============");
-
-        boolean todoCoincide = true;
-        for (Character c : conjuntoAEvaluar) {
-            if (conjuntoResultante.contains(c)) {
-                System.out.println(c + " -> exitoso");
-            } else {
-                System.out.println(c + " -> fallo");
-                todoCoincide = false;
-            }
-        }
-
-        if (todoCoincide) {
-            System.out.println("Todos los elementos del conjunto están presentes en el conjunto resultante de la operación " + nombreOperacion + ".");
-        } else {
-            System.out.println("La evaluación falló.");
-        }
-
-        System.out.println("===============");
     }
 
     // Obtener todos los conjuntos registrados con sus nombres y elementos
@@ -135,6 +108,9 @@ public class ConjuntoManager {
     // Obtener todas las operaciones guardadas con su notación
     public String getOperaciones() {
         StringBuilder resultado = new StringBuilder();
+        if (operaciones.isEmpty()) {
+            return "No hay operaciones definidas.";
+        }
         for (Map.Entry<String, Operacion> entry : operaciones.entrySet()) {
             String nombre = entry.getKey();
             String notacion = entry.getValue().getNotacion();
@@ -143,6 +119,14 @@ public class ConjuntoManager {
                      .append(notacion)
                      .append("\n");
         }
+
+        // Devolver el resultado como una cadena
         return resultado.toString();
+    }
+
+    
+    // Método para obtener todas las operaciones
+    public Map<String, Operacion> getOperacionesMap() {
+        return operaciones;
     }
 }
