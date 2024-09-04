@@ -9,14 +9,15 @@ import java.util.List;
  * Implementación de la ley de De Morgan.
  * Esta clase verifica si se puede aplicar la ley de De Morgan a un nodo y la aplica si es posible.
  * La ley de De Morgan establece que:
- * - El complemento de una unión es igual a la intersección de los complementos: ¬(A ∪ B) = ¬A ∩ ¬B
- * - El complemento de una intersección es igual a la unión de los complementos: ¬(A ∩ B) = ¬A ∪ ¬B
- * 
+ * - El complemento de una unión es igual a la intersección de los complementos: ^(A ∪ B) = ^A ∩^ B
+ * - El complemento de una intersección es igual a la unión de los complementos: ^(A ∩ B) = ^A ∪ ^B
+ 
  */
 public class DeMorgan implements Ley {
 
     @Override
     public boolean esAplicable(Nodo nodo) {
+        // Comprobar si el nodo es de tipo NodoUnario
         if (!(nodo instanceof NodoUnario)) {
             System.out.println("DeMorgan.esAplicable: El nodo no es de tipo NodoUnario. No aplicable.");
             return false;
@@ -25,16 +26,14 @@ public class DeMorgan implements Ley {
         NodoUnario operacion = (NodoUnario) nodo;
         Nodo operando = operacion.getOperand();
 
-        // Verificar que el operando es un NodoBinario y luego acceder a su operador
+        // Comprobar si el operador es '^' y el operando es NodoBinario
         if (operacion.getOperador().equals("^") && operando instanceof NodoBinario) {
             NodoBinario operandoBinario = (NodoBinario) operando;
             boolean aplicable = operandoBinario.getOperador().equals("U") || operandoBinario.getOperador().equals("&");
             if (aplicable) {
                 System.out.println("DeMorgan.esAplicable: La ley de DeMorgan es aplicable para el nodo: " + operacion.mostrarContenido());
-            } else {
-                System.out.println("DeMorgan.esAplicable: La ley de DeMorgan no es aplicable. Operador del operando no es 'U' ni '&'.");
+                return true;
             }
-            return aplicable;
         }
 
         System.out.println("DeMorgan.esAplicable: El operando no es de tipo NodoBinario o el operador no es '^'. No aplicable.");
@@ -43,7 +42,7 @@ public class DeMorgan implements Ley {
 
     @Override
     public Nodo aplicar(Nodo nodo, List<String> leyesAplicadas) {
-        // Verificar que el nodo es de tipo NodoUnario
+        // Comprobar si el nodo es de tipo NodoUnario
         if (!(nodo instanceof NodoUnario)) {
             System.out.println("DeMorgan.aplicar: El nodo no es de tipo NodoUnario. No se aplica la ley de DeMorgan.");
             return nodo;
@@ -52,10 +51,11 @@ public class DeMorgan implements Ley {
         NodoUnario operacion = (NodoUnario) nodo;
         Nodo operando = operacion.getOperand();
 
+        // Verificar si el operando es un NodoBinario
         if (operando instanceof NodoBinario) {
             NodoBinario operandoBinario = (NodoBinario) operando;
             String nuevoOperador = operandoBinario.getOperador().equals("U") ? "&" : "U";
-            leyesAplicadas.add("leyes de DeMorgan");
+            leyesAplicadas.add("ley de DeMorgan");
 
             // Aplicar la ley de De Morgan: cambiar operadores y aplicar complementos
             System.out.println("DeMorgan.aplicar: Aplicando ley de DeMorgan:");
@@ -68,10 +68,12 @@ public class DeMorgan implements Ley {
                     new NodoUnario("^", operandoBinario.getDerecho()));
 
             System.out.println("DeMorgan.aplicar: Nodo resultado después de aplicar ley: " + resultado.mostrarContenido());
+
+            // Devuelve el resultado transformado para permitir más simplificaciones
             return resultado;
         }
 
-        // Si el operando no es un NodoBinario, retornar la operación sin cambios y depuración
+        // Si el operando no es un NodoBinario, retornar la operación sin cambios
         System.out.println("DeMorgan.aplicar: El operando no es de tipo NodoBinario. No se aplica la ley de DeMorgan.");
         return operacion;
     }
