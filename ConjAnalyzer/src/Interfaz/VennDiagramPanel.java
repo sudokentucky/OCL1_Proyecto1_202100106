@@ -103,25 +103,29 @@ public class VennDiagramPanel extends JPanel {
 
     private Point2D[] calcularPosicionesConjuntos(Point2D centro, double radio, int numConjuntos) {
         Point2D[] posiciones = new Point2D[numConjuntos];
-        double separation = radio * 1.5;  // Ajusta esta separación según sea necesario
+        double separation = radio * 0.9;  // Ajusta esta separación según sea necesario
 
         switch (numConjuntos) {
+            case 1:
+                posiciones[0] = new Point2D(centro.getX(), centro.getY());
+                break;
+
             case 2:
-                posiciones[0] = new Point2D(centro.getX() - separation / 2, centro.getY());
-                posiciones[1] = new Point2D(centro.getX() + separation / 2, centro.getY());
+                posiciones[0] = new Point2D(centro.getX() - separation / 1.6, centro.getY());
+                posiciones[1] = new Point2D(centro.getX() + separation / 1.6, centro.getY());
                 break;
 
             case 3:
-                posiciones[0] = new Point2D(centro.getX() - separation / 2, centro.getY() - separation / 3);
-                posiciones[1] = new Point2D(centro.getX() + separation / 2, centro.getY() - separation / 3);
+                posiciones[0] = new Point2D(centro.getX() - separation / 1.6, centro.getY() - separation / 3);
+                posiciones[1] = new Point2D(centro.getX() + separation / 1.6, centro.getY() - separation / 3);
                 posiciones[2] = new Point2D(centro.getX(), centro.getY() + separation * 2 / 3);
                 break;
 
             case 4:
-                posiciones[0] = new Point2D(centro.getX() - separation / 2, centro.getY() - separation / 2);
-                posiciones[1] = new Point2D(centro.getX() + separation / 2, centro.getY() - separation / 2);
-                posiciones[2] = new Point2D(centro.getX() - separation / 2, centro.getY() + separation / 2);
-                posiciones[3] = new Point2D(centro.getX() + separation / 2, centro.getY() + separation / 2);
+                posiciones[0] = new Point2D(centro.getX() - separation / 1.6, centro.getY() - separation / 2);
+                posiciones[1] = new Point2D(centro.getX() + separation / 1.6, centro.getY() - separation / 2);
+                posiciones[2] = new Point2D(centro.getX() - separation / 1.6, centro.getY() + separation / 2);
+                posiciones[3] = new Point2D(centro.getX() + separation / 1.6, centro.getY() + separation / 2);
                 break;
 
             default:
@@ -224,7 +228,7 @@ public class VennDiagramPanel extends JPanel {
 
     private void dibujarOperacion(Graphics2D g2d, Nodo raizSimplificada) {
         String operacion = raizSimplificada.mostrarContenido();
-        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.setFont(new Font("Arial", Font.BOLD, 12));
         g2d.setColor(Color.BLACK);
         g2d.drawString("Operación: " + operacion, (int) universeX, (int) (universeY + universeHeight + 30));
     }
