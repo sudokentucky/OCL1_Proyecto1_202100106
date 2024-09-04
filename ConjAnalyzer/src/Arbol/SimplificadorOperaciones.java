@@ -10,285 +10,116 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONObject;
+import Leyes.*;
+import java.util.Arrays;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 
-/**
- *
- * @author Keneth Lopez
- */
 public class SimplificadorOperaciones {
     private ConjuntoManager conjuntoManager;
-    private Map<String, List<String>> leyesAplicadasPorOperacion; 
+    private Map<String, List<String>> leyesAplicadasPorOperacion;
+    private List<Ley> leyes;
 
     public SimplificadorOperaciones(ConjuntoManager conjuntoManager) {
         this.conjuntoManager = conjuntoManager;
         this.leyesAplicadasPorOperacion = new HashMap<>();
+        this.leyes = Arrays.asList(
+            new Absorcion(), 
+            new Asociativa(), 
+            new Conmutativa(), 
+            new DeMorgan(), 
+            new Distributiva(), 
+            new DobleComplemento(), 
+            new Idempotente()
+        );
     }
 
+    // Método para simplificar un árbol y guardar el árbol simplificado en el objeto ArbolExpresion
     public Nodo simplificar(Nodo nodo, String nombreOperacion) {
         Set<String> estadosVisitados = new HashSet<>();
         List<String> leyesAplicadas = new ArrayList<>();
-        Nodo resultadoSimplificado = simplificarRecursivo(nodo, nombreOperacion, estadosVisitados, leyesAplicadas);
-        leyesAplicadasPorOperacion.put(nombreOperacion, leyesAplicadas); 
+        Nodo resultadoSimplificado = simplificarRecursivo(nodo, estadosVisitados, leyesAplicadas);
+
+        // Guardar las leyes aplicadas por la operación
+        leyesAplicadasPorOperacion.put(nombreOperacion, leyesAplicadas);
+
         return resultadoSimplificado;
     }
 
-    private Nodo simplificarRecursivo(Nodo nodo, String nombreOperacion, Set<String> estadosVisitados, List<String> leyesAplicadas) {
+    private Nodo simplificarRecursivo(Nodo nodo, Set<String> estadosVisitados, List<String> leyesAplicadas) {
+        String representacionNodo = nodo.mostrarContenido();
+        if (estadosVisitados.contains(representacionNodo)) {
+            System.out.println("Ciclo detectado, deteniendo simplificación para: " + representacionNodo);
+            return nodo;
+        }
+
+        // Marcar el nodo como visitado
+        estadosVisitados.add(representacionNodo);
+
+        // Simplificar recursivamente los nodos hijos si es un nodo binario
         if (nodo instanceof NodoBinario) {
             NodoBinario operacion = (NodoBinario) nodo;
 
-            Nodo izquierdoSimplificado = simplificarRecursivo(operacion.getIzquierdo(), nombreOperacion, estadosVisitados, leyesAplicadas);
-            Nodo derechoSimplificado = simplificarRecursivo(operacion.getDerecho(), nombreOperacion, estadosVisitados, leyesAplicadas);
+            // Aplicar simplificación recursiva a los hijos
+            Nodo izquierdoSimplificado = simplificarRecursivo(operacion.getIzquierdo(), new HashSet<>(estadosVisitados), leyesAplicadas);
+            Nodo derechoSimplificado = simplificarRecursivo(operacion.getDerecho(), new HashSet<>(estadosVisitados), leyesAplicadas);
 
+            // Reconstruir el nodo binario simplificado
             NodoBinario operacionSimplificada = new NodoBinario(operacion.getOperador(), izquierdoSimplificado, derechoSimplificado);
-
-            Nodo nodoResultado = aplicarPropiedadesBinarias(operacionSimplificada, leyesAplicadas);
-
-            String representacionNodo = nodoResultado.mostrarContenido();
-            if (!estadosVisitados.add(representacionNodo)) {
-                System.out.println("Ciclo detectado, deteniendo simplificación para: " + representacionNodo);
-                return nodoResultado;
-            }
-
-            if (nombreOperacion.equals("OperacionPrincipal")) {
-                Set<Character> conjuntoResultado = nodoResultado.evaluar();
-                conjuntoManager.guardarOperacion(nombreOperacion, representacionNodo, conjuntoResultado);
-            }
+            Nodo nodoResultado = aplicarLeyes(operacionSimplificada, leyesAplicadas, estadosVisitados);
 
             return nodoResultado;
 
         } else if (nodo instanceof NodoUnario) {
             NodoUnario operacion = (NodoUnario) nodo;
-            Nodo operandoSimplificado = simplificarRecursivo(operacion.getOperand(), nombreOperacion, estadosVisitados, leyesAplicadas);
-            NodoUnario operacionSimplificada = new NodoUnario(operacion.getOperador(), operandoSimplificado);
-            Nodo nodoResultado = aplicarPropiedadesUnarias(operacionSimplificada, leyesAplicadas);
-            String representacionNodo = nodoResultado.mostrarContenido();
-            if (!estadosVisitados.add(representacionNodo)) {
-                System.out.println("Ciclo detectado, deteniendo simplificación para: " + representacionNodo);
-                return nodoResultado;
-            }
 
-            if (nombreOperacion.equals("OperacionPrincipal")) {
-                Set<Character> conjuntoResultado = nodoResultado.evaluar();
-                conjuntoManager.guardarOperacion(nombreOperacion, representacionNodo, conjuntoResultado);
-            }
+            // Aplicar simplificación recursiva al operando
+            Nodo operandoSimplificado = simplificarRecursivo(operacion.getOperand(), new HashSet<>(estadosVisitados), leyesAplicadas);
+
+            // Reconstruir el nodo unario simplificado
+            NodoUnario operacionSimplificada = new NodoUnario(operacion.getOperador(), operandoSimplificado);
+            Nodo nodoResultado = aplicarLeyes(operacionSimplificada, leyesAplicadas, estadosVisitados);
 
             return nodoResultado;
-
         }
 
-        return nodo; // Si es un NodoConjunto, no necesita simplificación
-    }
-    /*
-    PROPIEDADES DE UN OPERADOR (UNARIAS)
-    */
-    private boolean esLeyDeMorgan(NodoUnario operacion) {
-        Nodo operando = operacion.getOperand();
-
-        if (operando instanceof NodoBinario) {
-            NodoBinario operandoBinario = (NodoBinario) operando;
-
-            // ^(A ∪ B) = ^A ∩ ^B y ^(A ∩ B) = ^A ∪ ^B
-            return ("U".equals(operandoBinario.getOperador()) || "&".equals(operandoBinario.getOperador()));
-        }
-
-        return false;
+        // Si es un nodo de conjunto o un nodo que no requiere simplificación adicional
+        return nodo;
     }
 
-    private boolean esDobleComplemento(NodoUnario operacion) {
-        Nodo operando = operacion.getOperand();
+    private Nodo aplicarLeyes(Nodo nodo, List<String> leyesAplicadas, Set<String> estadosVisitados) {
+        boolean seAplicoLey;
+        int iteraciones = 0;
+        Set<String> leyesAplicadasAesteNodo = new HashSet<>();
 
-        // ^^A = A
-        return (operando instanceof NodoUnario && "^".equals(((NodoUnario) operando).getOperador()));
-    }
-    
-    private Nodo aplicarPropiedadesUnarias(NodoUnario operacion, List<String> leyesAplicadas) {
-        Nodo operando = operacion.getOperand();
+        do {
+            seAplicoLey = false;
+            for (Ley ley : leyes) {
+                if (ley.esAplicable(nodo) && !leyesAplicadasAesteNodo.contains(ley.getClass().getSimpleName())) {
+                    Nodo nodoSimplificado = ley.aplicar(nodo, leyesAplicadas);
+                    String representacionSimplificada = nodoSimplificado.mostrarContenido();
 
-        // Ley del Doble Complemento: ^^A = A
-        if (esDobleComplemento(operacion)) {
-            System.out.println("Aplicando Ley del Doble Complemento: ^^" + operando.mostrarContenido() + " = " + ((NodoUnario) operando).getOperand().mostrarContenido());
-            leyesAplicadas.add("ley del doble complemento");
-            return ((NodoUnario) operando).getOperand();
-        }
-
-        // Ley de DeMorgan: ^(A ∪ B) = ^A ∩ ^B y ^(A ∩ B) = ^A ∪ ^B
-        if (esLeyDeMorgan(operacion)) {
-            NodoBinario operandoBinario = (NodoBinario) operando;
-            String nuevoOperador = "U".equals(operandoBinario.getOperador()) ? "&" : "U";
-            System.out.println("Aplicando Ley de DeMorgan: ^(" + operando.mostrarContenido() + ") = " + nuevoOperador);
-            leyesAplicadas.add("leyes de DeMorgan");
-            return new NodoBinario(nuevoOperador,
-                    new NodoUnario("^", operandoBinario.getIzquierdo()),
-                    new NodoUnario("^", operandoBinario.getDerecho()));
-        }
-
-        return operacion; // Devolver la operación si no se pudo simplificar más
-    }
-
-     /*
-    PROPIEDADES DE DOS OPERADORES (BINARIAS)
-    */
-    private boolean esPropiedadDeAbsorcion(Nodo posibleAbsorbedor, Nodo posibleAbsorcion) {
-        if (posibleAbsorcion instanceof NodoBinario) {
-            NodoBinario nodoBinario = (NodoBinario) posibleAbsorcion;
-            // Verifica A ∪ (A ∩ B) = A o A ∪ (B ∩ A) = A
-            if ("&".equals(nodoBinario.getOperador())) {
-                return (nodoBinario.getIzquierdo().equals(posibleAbsorbedor) || nodoBinario.getDerecho().equals(posibleAbsorbedor));
-            }
-            // Verifica A ∩ (A ∪ B) = A o A ∩ (B ∪ A) = A
-            if ("U".equals(nodoBinario.getOperador())) {
-                return (nodoBinario.getIzquierdo().equals(posibleAbsorbedor) || nodoBinario.getDerecho().equals(posibleAbsorbedor));
-            }
-        }
-        return false;
-    }
-
-    private boolean esPropiedadConmutativa(Nodo nodo1, Nodo nodo2) {
-        return nodo1.equals(nodo2);
-    }
-    
-    private boolean esPropiedadAsociativa(NodoBinario operacion) {
-        Nodo izquierdo = operacion.getIzquierdo();
-        Nodo derecho = operacion.getDerecho();
-
-        // A ∪ (B ∪ C) = (A ∪ B) ∪ C
-        if ("U".equals(operacion.getOperador()) && derecho instanceof NodoBinario) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
-            return "U".equals(derechoOperacion.getOperador());
-        }
-
-        // A ∩ (B ∩ C) = (A ∩ B) ∩ C
-        if ("&".equals(operacion.getOperador()) && derecho instanceof NodoBinario) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
-            return "&".equals(derechoOperacion.getOperador());
-        }
-
-        return false;
-    }
-    
-    private boolean esPropiedadDistributiva(NodoBinario operacion) {
-        Nodo izquierdo = operacion.getIzquierdo();
-        Nodo derecho = operacion.getDerecho();
-
-        // A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)
-        if ("U".equals(operacion.getOperador()) && derecho instanceof NodoBinario) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
-            return "&".equals(derechoOperacion.getOperador());
-        }
-
-        // A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)
-        if ("&".equals(operacion.getOperador()) && derecho instanceof NodoBinario) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
-            return "U".equals(derechoOperacion.getOperador());
-        }
-
-        return false;
-    }
-    
-
-private Nodo aplicarPropiedadesBinarias(NodoBinario operacion, List<String> leyesAplicadas) {
-    Nodo izquierdo = operacion.getIzquierdo();
-    Nodo derecho = operacion.getDerecho();
-
-    switch (operacion.getOperador()) {
-        case "U":
-            // Absorción: A ∪ (A ∩ B) = A, (A ∩ B) ∪ A = A
-            if (esPropiedadDeAbsorcion(izquierdo, derecho)) {
-                System.out.println("Aplicando Propiedad de Absorción: " + izquierdo.mostrarContenido() + " U " + derecho.mostrarContenido() + " = " + izquierdo.mostrarContenido());
-                leyesAplicadas.add("propiedad de absorción");
-                return izquierdo;
-            } else if (esPropiedadDeAbsorcion(derecho, izquierdo)) {
-                System.out.println("Aplicando Propiedad de Absorción: " + derecho.mostrarContenido() + " U " + izquierdo.mostrarContenido() + " = " + derecho.mostrarContenido());
-                leyesAplicadas.add("propiedad de absorción");
-                return derecho;
-            }
-
-            // Propiedad Conmutativa: A ∪ B = B ∪ A
-            if (esPropiedadConmutativa(izquierdo, derecho)) {
-                System.out.println("Aplicando Propiedad Conmutativa: " + izquierdo.mostrarContenido() + " U " + derecho.mostrarContenido());
-                leyesAplicadas.add("propiedad conmutativa");
-                if (izquierdo.toString().compareTo(derecho.toString()) > 0) {
-                    return new NodoBinario("U", derecho, izquierdo);
+                    // Solo continuar si el nodo simplificado es diferente y no ha sido visitado antes
+                    if (!representacionSimplificada.equals(nodo.mostrarContenido()) && !estadosVisitados.contains(representacionSimplificada)) {
+                        nodo = nodoSimplificado;
+                        estadosVisitados.add(representacionSimplificada);
+                        leyesAplicadasAesteNodo.add(ley.getClass().getSimpleName());
+                        seAplicoLey = true;
+                        break;
+                    }
                 }
             }
 
-            // Propiedad Idempotente: A ∪ A = A
-            if (izquierdo.equals(derecho)) {
-                System.out.println("Aplicando Propiedad Idempotente: " + izquierdo.mostrarContenido() + " U " + derecho.mostrarContenido() + " = " + izquierdo.mostrarContenido());
-                leyesAplicadas.add("propiedad idempotente");
-                return izquierdo;
+            if (++iteraciones > 50) { // Limitar a 50 iteraciones para prevenir bucles infinitos
+                System.out.println("Límite de iteraciones alcanzado, deteniendo simplificación.");
+                break;
             }
 
-            // Propiedad Asociativa: A ∪ (B ∪ C) = (A ∪ B) ∪ C
-            if (esPropiedadAsociativa(operacion)) {
-                System.out.println("Aplicando Propiedad Asociativa: " + izquierdo.mostrarContenido() + " U (" + derecho.mostrarContenido() + ")");
-                leyesAplicadas.add("propiedad asociativa");
-                NodoBinario derechoOperacion = (NodoBinario) derecho;
-                return new NodoBinario("U", new NodoBinario("U", izquierdo, derechoOperacion.getIzquierdo()), derechoOperacion.getDerecho());
-            }
+        } while (seAplicoLey);
 
-            // Propiedad Distributiva: A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)
-            if (esPropiedadDistributiva(operacion)) {
-                System.out.println("Aplicando Propiedad Distributiva: " + izquierdo.mostrarContenido() + " U (" + derecho.mostrarContenido() + ")");
-                leyesAplicadas.add("propiedad distributiva");
-                NodoBinario derechoOperacion = (NodoBinario) derecho;
-                return new NodoBinario("&", 
-                        new NodoBinario("U", izquierdo, derechoOperacion.getIzquierdo()), 
-                        new NodoBinario("U", izquierdo, derechoOperacion.getDerecho()));
-            }
-            break;
-
-        case "&":
-            // Absorción: A ∩ (A ∪ B) = A, (A ∪ B) ∩ A = A
-            if (esPropiedadDeAbsorcion(izquierdo, derecho)) {
-                System.out.println("Aplicando Propiedad de Absorción: " + izquierdo.mostrarContenido() + " ∩ " + derecho.mostrarContenido() + " = " + izquierdo.mostrarContenido());
-                leyesAplicadas.add("propiedad de absorción");
-                return izquierdo;
-            } else if (esPropiedadDeAbsorcion(derecho, izquierdo)) {
-                System.out.println("Aplicando Propiedad de Absorción: " + derecho.mostrarContenido() + " ∩ " + izquierdo.mostrarContenido() + " = " + derecho.mostrarContenido());
-                leyesAplicadas.add("propiedad de absorción");
-                return derecho;
-            }
-
-            // Propiedad Conmutativa: A ∩ B = B ∩ A
-            if (esPropiedadConmutativa(izquierdo, derecho)) {
-                System.out.println("Aplicando Propiedad Conmutativa: " + izquierdo.mostrarContenido() + " ∩ " + derecho.mostrarContenido());
-                leyesAplicadas.add("propiedad conmutativa");
-                if (izquierdo.toString().compareTo(derecho.toString()) > 0) {
-                    return new NodoBinario("&", derecho, izquierdo);
-                }
-            }
-
-            // Propiedad Idempotente: A ∩ A = A
-            if (izquierdo.equals(derecho)) {
-                System.out.println("Aplicando Propiedad Idempotente: " + izquierdo.mostrarContenido() + " ∩ " + derecho.mostrarContenido() + " = " + izquierdo.mostrarContenido());
-                leyesAplicadas.add("propiedad idempotente");
-                return izquierdo;
-            }
-
-            // Propiedad Asociativa: A ∩ (B ∩ C) = (A ∩ B) ∩ C
-            if (esPropiedadAsociativa(operacion)) {
-                System.out.println("Aplicando Propiedad Asociativa: " + izquierdo.mostrarContenido() + " ∩ (" + derecho.mostrarContenido() + ")");
-                leyesAplicadas.add("propiedad asociativa");
-                NodoBinario derechoOperacion = (NodoBinario) derecho;
-                return new NodoBinario("&", new NodoBinario("&", izquierdo, derechoOperacion.getIzquierdo()), derechoOperacion.getDerecho());
-            }
-
-            // Propiedad Distributiva: A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)
-            if (esPropiedadDistributiva(operacion)) {
-                System.out.println("Aplicando Propiedad Distributiva: " + izquierdo.mostrarContenido() + " ∩ (" + derecho.mostrarContenido() + ")");
-                leyesAplicadas.add("propiedad distributiva");
-                NodoBinario derechoOperacion = (NodoBinario) derecho;
-                return new NodoBinario("U", 
-                        new NodoBinario("&", izquierdo, derechoOperacion.getIzquierdo()), 
-                        new NodoBinario("&", izquierdo, derechoOperacion.getDerecho()));
-            }
-            break;
+        return nodo;
     }
-
-    return operacion; // Devolver la operación si no se pudo simplificar más
-}
-
 
     public void generarJSON(String rutaArchivo) {
         JSONObject json = new JSONObject();
