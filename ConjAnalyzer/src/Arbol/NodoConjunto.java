@@ -41,23 +41,6 @@ public class NodoConjunto extends Nodo {
     }
     
     @Override
-    public Area dibujar(Graphics2D g2d, Point2D centro, double radio) {
-        // Crear un círculo con el radio escalado
-        Ellipse2D.Double conjuntoCirculo = new Ellipse2D.Double(
-            centro.getX() - radio, centro.getY() - radio, 2 * radio, 2 * radio);
-        Area areaConjunto = new Area(conjuntoCirculo);
-
-        // Dibujar el círculo en el gráfico
-        g2d.draw(conjuntoCirculo);
-
-        // Dibujar la etiqueta del conjunto
-        g2d.setFont(new Font("Arial", Font.BOLD, 14));
-        g2d.drawString(nombreConjunto, (int) centro.getX() - 5, (int) centro.getY() + 5);
-
-        return areaConjunto;
-    }
-
-    @Override
     public void recopilarConjuntos(Set<String> conjuntos) {
         conjuntos.add(nombreConjunto);
     }

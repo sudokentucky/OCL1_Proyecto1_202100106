@@ -17,10 +17,7 @@ public abstract class Nodo {
     // Método abstracto para representar el nodo como una cadena
     @Override
     public abstract String toString();
-
-    // Método abstracto para dibujar el nodo en el diagrama de Venn
-    public abstract Area dibujar(Graphics2D g2d, Point2D centro, double radio);
-
+    
     // Nuevo método abstracto para recopilar nombres de conjuntos en el nodo y sus hijos
     public abstract void recopilarConjuntos(Set<String> conjuntos);
 }

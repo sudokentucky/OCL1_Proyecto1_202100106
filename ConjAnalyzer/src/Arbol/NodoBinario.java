@@ -55,39 +55,6 @@ public class NodoBinario extends Nodo {
         return mostrarContenido();
     }
     
-    @Override
-    public Area dibujar(Graphics2D g2d, Point2D centro, double radio) {
-        // Definir el desplazamiento para la superposición de círculos
-        double desplazamiento = radio * 0.8; // Ajuste para una superposición más natural
-
-        // Dibujar el nodo hijo izquierdo
-        Point2D centroIzquierdo = new Point2D(centro.getX() - desplazamiento, centro.getY());
-        Area areaIzquierda = izquierdo.dibujar(g2d, centroIzquierdo, radio);
-
-        // Dibujar el nodo hijo derecho
-        Point2D centroDerecho = new Point2D(centro.getX() + desplazamiento, centro.getY());
-        Area areaDerecha = derecho.dibujar(g2d, centroDerecho, radio);
-
-        // Crear una nueva área para el resultado
-        Area resultado = new Area(areaIzquierda);
-
-        // Aplicar la operación binaria
-        switch (operador) {
-            case "U":  // Unión
-                resultado.add(areaDerecha);
-                break;
-            case "&":  // Intersección
-                resultado.intersect(areaDerecha);
-                break;
-            case "-":  // Diferencia
-                resultado.subtract(areaDerecha);
-                break;
-            default:
-                throw new IllegalArgumentException("Operador binario desconocido: " + operador);
-        }
-
-        return resultado;
-    }
 
     @Override
         public void recopilarConjuntos(Set<String> conjuntos) {
