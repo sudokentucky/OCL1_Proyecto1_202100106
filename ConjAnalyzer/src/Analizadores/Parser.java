@@ -550,10 +550,6 @@ class CUP$Parser$actions {
         // Evaluar el resultado de la operación simplificada
         Set<Character> resultado = arbolSimplificado.evaluar();
 
-        // Mostrar el contenido del árbol original
-        System.out.println("Contenido del árbol:");
-        System.out.println(nuevoArbol.mostrarContenido());
-
         // Guardar la operación simplificada en el ConjuntoManager
         conjuntoManager.guardarOperacion(id, arbolSimplificado.mostrarContenido(), resultado);
 
