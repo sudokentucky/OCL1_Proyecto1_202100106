@@ -12,6 +12,7 @@ public class NodoUnario extends Nodo {
     private String operador;
     private Nodo operand;
 
+
     public NodoUnario(String operador, Nodo operand) {
         if (operador == null || operand == null) {
             throw new IllegalArgumentException("Operador o operando no pueden ser nulos");
@@ -49,6 +50,15 @@ public class NodoUnario extends Nodo {
 
     public String getOperador() {
         return operador;
+    }
+    
+    public void setOperador(String operador) {
+        this.operador = operador;
+    }
+
+    
+    public void setOperand(Nodo operand) {
+        this.operand = operand;
     }
 
     public Nodo getOperand() {
