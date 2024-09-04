@@ -8,21 +8,25 @@ import Arbol.SimplificadorOperaciones;
 import Componentes.SyntaxError;
 import Interfaz.OutputManager;
 import java.util.Stack;
+import Interfaz.Inicio;
+import javax.swing.SwingUtilities;
 
 parser code {:
+        private Inicio inicio; 
         private List<SyntaxError> syntaxErrors = new ArrayList<>();
         private OutputManager outputManager;
         private ConjuntoManager conjuntoManager;
         private SimplificadorOperaciones simplificador;
-        private ArbolPrefijo arbolPrefijo;
+        private ArbolExpresion arbolExpresion;
 
-        public Parser(AnalizadorLexico lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolPrefijo arbolPrefijo) {
+            public Parser(AnalizadorLexico lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolExpresion arbolExpresion, Inicio inicio) {
             super(lexer);
             this.outputManager = outputManager;
-            this.conjuntoManager = conjuntoManager;  
+            this.conjuntoManager = conjuntoManager;
             this.simplificador = simplificador;
-            this.arbolPrefijo = arbolPrefijo; 
-            this.init_actions(); 
+            this.arbolExpresion = arbolExpresion;
+            this.inicio = inicio;  // Inicializar la variable de instancia
+            this.init_actions();
         }
 
    public void syntax_error(Symbol s) {
@@ -162,7 +166,7 @@ non terminal Sentencias;
 non terminal Sentencia;
 non terminal DefinicionConjunto;
 non terminal DefinicionOperacion;
-non terminal List<String> OperacionTokens;  
+non terminal Nodo OperacionTokens;  
 non terminal Evaluacion;
 non terminal Set<Character> Conjunto;
 non terminal Set<Character> Rango;
@@ -193,7 +197,9 @@ Sentencia ::= DefinicionConjunto
               :}
             ;
 
-
+/*
+================================= CONJUNTOS ======================================================
+*/
 // Producción para definir un conjunto
 DefinicionConjunto ::= CONJ:conj DOSPUNTOS:dosp ID:id FLECHA:flecha Conjunto:conjSet PUNTOYCOMA:punto
     {:
@@ -222,71 +228,90 @@ Rango ::= CONJUNTO:conj1 HASTA:hasta CONJUNTO:conj2
         System.out.println("Conjunto generado: " + RESULT);
     :};
 
-DefinicionOperacion ::= OPERA:opera DOSPUNTOS:dosp ID:id FLECHA:flecha OperacionTokens:tokens PUNTOYCOMA:punto
+/*
+================================= OPERACIONES ======================================================
+*/
+DefinicionOperacion ::= OPERA:opera DOSPUNTOS:dosp ID:id FLECHA:flecha OperacionTokens:raiz PUNTOYCOMA:punto
 {:
+    {
     try {
-        Nodo arbol = arbolPrefijo.construirArbol(tokens);
-        Nodo arbolSimplificado = simplificador.simplificar(arbol, id);
+        // Crear un nuevo árbol de expresión
+        ArbolExpresion nuevoArbol = new ArbolExpresion();
+        nuevoArbol.construir(raiz); // Construir el árbol a partir de la operación tokens
+
+        // Simplificar el árbol y obtener el nodo raíz simplificado
+        Nodo arbolSimplificado = simplificador.simplificar(nuevoArbol.getRaiz(), id);
+
+        // Guardar el árbol simplificado en el objeto ArbolExpresion
+        nuevoArbol.setRaizSimplificada(arbolSimplificado);
+
+        // Evaluar el resultado de la operación simplificada
         Set<Character> resultado = arbolSimplificado.evaluar();
+
+        // Mostrar el contenido del árbol original
+        System.out.println("Contenido del árbol:");
+        System.out.println(nuevoArbol.mostrarContenido());
+
+        // Guardar la operación simplificada en el ConjuntoManager
         conjuntoManager.guardarOperacion(id, arbolSimplificado.mostrarContenido(), resultado);
+
+        // Agregar el árbol a la lista en 'Inicio'
+        inicio.arbolesExpresion.add(nuevoArbol);
+
+        // Imprimir información adicional para depuración
         System.out.println("Operación '" + id + "' simplificada y guardada.");
         System.out.println("Árbol de operación simplificada: " + arbolSimplificado);
         System.out.println("Resultado de la operación: " + resultado);
         System.out.println("------------------------------------");
         System.out.println(conjuntoManager.getOperaciones());
-
     } catch (Exception e) {
         String message = "Error al definir operación '" + id + "': " + e.getMessage();
         System.err.println(message);
         outputManager.addErrorOutput(message);
         syntaxErrors.add(new SyntaxError(operaleft, puntoright, e.getMessage(), "Error en la Definición de Operación"));
     }
+}
 :};
 
 OperacionTokens ::= DIFERENCIA:dif OperacionTokens:op1 OperacionTokens:op2
 {:
-    List<String> tokens = new ArrayList<>();
-    tokens.add("-");  // Primero se añade el operador para notación prefija
-    tokens.addAll(op1); // Luego el primer operando
-    tokens.addAll(op2); // Luego el segundo operando
-    RESULT = tokens;
-    System.out.println("Token de diferencia añadido: " + tokens);
+    // Crear un nodo binario para la operación de diferencia
+    Nodo nodo = new NodoBinario("-", op1, op2);
+    RESULT = nodo; // Asignar el nodo creado al resultado de la producción
+    System.out.println("Nodo de diferencia creado: " + nodo);
 :}
 | UNION:union OperacionTokens:op1 OperacionTokens:op2
 {:
-    List<String> tokens = new ArrayList<>();
-    tokens.add("U");  // Primero el operador
-    tokens.addAll(op1); // Luego el primer operando
-    tokens.addAll(op2); // Luego el segundo operando
-    RESULT = tokens;
-    System.out.println("Token de unión añadido: " + tokens);
+    // Crear un nodo binario para la operación de unión
+    Nodo nodo = new NodoBinario("U", op1, op2);
+    RESULT = nodo;
+    System.out.println("Nodo de unión creado: " + nodo);
 :}
 | INTERSECCION:inter OperacionTokens:op1 OperacionTokens:op2
 {:
-    List<String> tokens = new ArrayList<>();
-    tokens.add("&");  // Primero el operador
-    tokens.addAll(op1); // Luego el primer operando
-    tokens.addAll(op2); // Luego el segundo operando
-    RESULT = tokens;
-    System.out.println("Token de intersección añadido: " + tokens);
+    // Crear un nodo binario para la operación de intersección
+    Nodo nodo = new NodoBinario("&", op1, op2);
+    RESULT = nodo;
+    System.out.println("Nodo de intersección creado: " + nodo);
 :}
 | COMPLEMENTO:compl OperacionTokens:op
 {:
-    List<String> tokens = new ArrayList<>();
-    tokens.add("^");  // Primero el operador
-    tokens.addAll(op); // Luego el operando
-    RESULT = tokens;
-    System.out.println("Token de complemento añadido: " + tokens);
+    // Crear un nodo unario para la operación de complemento
+    Nodo nodo = new NodoUnario("^", op);
+    RESULT = nodo;
+    System.out.println("Nodo de complemento creado: " + nodo);
 :}
 | LLAVE_IZQ ID:id LLAVE_DER
 {:
-    List<String> tokens = new ArrayList<>();
-    tokens.add(id);  // Solo el identificador del conjunto
-    RESULT = tokens;
-    System.out.println("Identificador de conjunto añadido: " + tokens);
+    // Crear un nodo de conjunto para el identificador de conjunto
+    Nodo nodo = new NodoConjunto(id, conjuntoManager);
+    RESULT = nodo;
+    System.out.println("Nodo de conjunto creado: " + nodo);
 :};
 
-
+/*
+================================= EVALUACION ======================================================
+*/
 // Evaluación de tokens
 Evaluacion ::= EVALUAR PAR_IZQ  ELEMENTOS_EVALUAR: elementos COMA ID:id PAR_DER PUNTOYCOMA:punto
 {:
