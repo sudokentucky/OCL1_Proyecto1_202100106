@@ -63,7 +63,7 @@ public class Inicio extends javax.swing.JFrame {
         initComponents();
 
         // Inicializar el VennDiagramPanel con el árbol de expresión
-        vennDiagramPanel = new VennDiagramPanel(arbolExpresion);
+        vennDiagramPanel = new VennDiagramPanel(arbolExpresion, conjuntoManager);
         JpanelGraph.setLayout(new BorderLayout());
         JpanelGraph.add(vennDiagramPanel, BorderLayout.CENTER);
         JpanelGraph.revalidate();
