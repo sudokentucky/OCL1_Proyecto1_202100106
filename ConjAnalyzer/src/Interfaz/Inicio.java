@@ -5,18 +5,22 @@
 package Interfaz;
 import Analizadores.AnalizadorLexico;
 import Analizadores.Parser;
-import Arbol.ArbolPrefijo;
-import Arbol.SimplificadorOperaciones;
+import Arbol.*;
 import java.io.StringReader;
 import Componentes.Token;
 import Componentes.LexicalError;
 import Componentes.SyntaxError;
 import Conjuntos.ConjuntoManager;
+import Conjuntos.ConjuntoManager.Operacion;
+import java.awt.BorderLayout;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JOptionPane;
@@ -28,23 +32,45 @@ import javax.swing.JOptionPane;
 
 
 public class Inicio extends javax.swing.JFrame {
+    public List<ArbolExpresion> arbolesExpresion = new ArrayList<>();
     private OutputManager outputManager;
     private ConjuntoManager conjuntoManager;
     private SimplificadorOperaciones simplificador;
-    private ArbolPrefijo arbolPrefijo;
+    private VennDiagramPanel vennDiagramPanel;
+    private ArbolExpresion arbolExpresion;
+    private List<Map.Entry<String, Operacion>> operacionesList;
+    private int currentOperationIndex = 0;
+    private Parser parser;  // Añadir aquí
 
 
     /**
      * Creates new form Inicio
      */
+    /**
+     * Creates new form Inicio
+     */
     public Inicio() {
-        this.outputManager = new OutputManager();  // Crear una nueva instancia de OutputManager
-        this.conjuntoManager = new ConjuntoManager();  // Crear una nueva instancia de ConjuntoManager
+        this.outputManager = new OutputManager();
+        this.conjuntoManager = new ConjuntoManager();
         this.simplificador = new SimplificadorOperaciones(conjuntoManager);
-        this.arbolPrefijo = new ArbolPrefijo(conjuntoManager);
- 
+
+        // Crear un nodo raíz inicial para el árbol (por ejemplo, un NodoConjunto vacío)
+        Nodo nodoRaizInicial = new NodoConjunto("", conjuntoManager);
+
+        // Inicializar el árbol de expresiones con el nodo raíz inicial
+        this.arbolExpresion = new ArbolExpresion(nodoRaizInicial);
+
         initComponents();
+
+        // Inicializar el VennDiagramPanel con el árbol de expresión
+        vennDiagramPanel = new VennDiagramPanel(arbolExpresion);
+        JpanelGraph.setLayout(new BorderLayout());
+        JpanelGraph.add(vennDiagramPanel, BorderLayout.CENTER);
+        JpanelGraph.revalidate();
+        JpanelGraph.repaint();
     }
+
+
     
    
     /**
@@ -62,10 +88,10 @@ public class Inicio extends javax.swing.JFrame {
         entrada1 = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
         TextoEnrada = new javax.swing.JTextArea();
-        jPanel1 = new javax.swing.JPanel();
+        JpanelGraph = new javax.swing.JPanel();
         entrada2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        previousButton = new javax.swing.JButton();
+        nextButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         Archivo = new javax.swing.JMenu();
         NewFile = new javax.swing.JMenuItem();
@@ -93,23 +119,40 @@ public class Inicio extends javax.swing.JFrame {
         TextoEnrada.setRows(5);
         jScrollPane4.setViewportView(TextoEnrada);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        JpanelGraph.setAlignmentX(0.7F);
+        JpanelGraph.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                JpanelGraphPropertyChange(evt);
+            }
+        });
+
+        javax.swing.GroupLayout JpanelGraphLayout = new javax.swing.GroupLayout(JpanelGraph);
+        JpanelGraph.setLayout(JpanelGraphLayout);
+        JpanelGraphLayout.setHorizontalGroup(
+            JpanelGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 442, Short.MAX_VALUE)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        JpanelGraphLayout.setVerticalGroup(
+            JpanelGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
 
         entrada2.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         entrada2.setText("Graficas");
 
-        jButton1.setText("Anterior");
+        previousButton.setText("Anterior");
+        previousButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                previousButtonActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("Siguiente");
+        nextButton.setText("Siguiente");
+        nextButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextButtonActionPerformed(evt);
+            }
+        });
 
         Archivo.setText("Archivo");
 
@@ -206,14 +249,14 @@ public class Inicio extends javax.swing.JFrame {
                             .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 528, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(30, 30, 30)
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
                                 .addGap(130, 130, 130)
-                                .addComponent(jButton1)
+                                .addComponent(previousButton)
                                 .addGap(99, 99, 99)
-                                .addComponent(jButton2)))))
-                .addContainerGap(54, Short.MAX_VALUE))
+                                .addComponent(nextButton))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(37, 37, 37)
+                                .addComponent(JpanelGraph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(47, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(265, 265, 265)
                 .addComponent(entrada)
@@ -230,13 +273,13 @@ public class Inicio extends javax.swing.JFrame {
                     .addComponent(entrada2))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(JpanelGraph, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
                 .addGap(29, 29, 29)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(entrada1)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(previousButton)
+                    .addComponent(nextButton))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(66, Short.MAX_VALUE))
@@ -303,6 +346,27 @@ public class Inicio extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Operación cancelada. El archivo no se ha guardado.", "Operación Cancelada", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_NewFileActionPerformed
+    private void updateVennDiagramPanel() {
+    // Verificar si hay árboles de expresión en la lista
+    if (arbolesExpresion != null && !arbolesExpresion.isEmpty()) {
+        // Verificar que el índice actual esté dentro del rango de la lista de árboles
+        if (currentOperationIndex >= 0 && currentOperationIndex < arbolesExpresion.size()) {
+            // Obtener el árbol correspondiente de la lista de árboles
+            ArbolExpresion arbolActual = arbolesExpresion.get(currentOperationIndex);
+
+            // Debug: Imprimir el contenido del árbol actual
+            System.out.println("Mostrando árbol de expresión en índice: " + currentOperationIndex);
+            System.out.println("Contenido del árbol: " + arbolActual.mostrarContenido());
+
+            // Actualizar el árbol de expresión en el panel y repintar
+            vennDiagramPanel.updateDiagram(arbolActual);  // Usa el nuevo método para actualizar el diagrama
+        } else {
+            System.out.println("Índice de árbol de expresión inválido.");
+        }
+    } else {
+        System.out.println("No hay árboles de expresión para mostrar.");
+    }
+}
 
     private void AnalisisExcecuteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AnalisisExcecuteActionPerformed
         // Verificar si el JTextArea está vacío antes de proceder
@@ -310,49 +374,46 @@ public class Inicio extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "El área de texto está vacía. Por favor ingrese el código a analizar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        // Limpiar las salidas previas
+        arbolExpresion.mostrarContenido(); // Mostrar el contenido del árbol para depuración
         outputManager.clearOutputs();
-
-        // Obtener el texto del JTextArea
         String textoEntrada = TextoEnrada.getText();
-
-        // Crear un StringReader a partir del texto de entrada
         StringReader sr = new StringReader(textoEntrada);
-
-        // Crear el analizador léxico
         AnalizadorLexico lexer = new AnalizadorLexico(sr);
+        Parser parser = new Parser(lexer, outputManager, conjuntoManager, simplificador, arbolExpresion, this);
 
-        // Crear el analizador sintáctico (parser) con el lexer y OutputManager
-        Parser parser = new Parser(lexer, outputManager, conjuntoManager, simplificador, arbolPrefijo);
-
+        
         try {
-            // Ejecutar el análisis sintáctico
             parser.parse();
-
-            // Generar reportes HTML para tokens, errores léxicos y sintácticos
+            arbolExpresion.mostrarContenido(); // Mostrar el contenido del árbol para depuración
             generarYGuardarReportes(lexer, parser);
-            // Actualizar JTextPane en el Event Dispatch Thread (EDT)
             SwingUtilities.invokeLater(() -> {
                 Salida.setContentType("text/html");
                 Salida.setText(outputManager.getAllOutputs());
             });
-            
-            System.out.println("------------------- Operaciones luego del parser ----------------------------");
-            System.out.println(conjuntoManager.getOperaciones()); 
-            System.out.println("------------------------------------");
+            arbolExpresion.mostrarContenido(); // Mostrar el contenido del árbol para depuración
             simplificador.generarJSON("./src/Salidas/operaciones.json");
 
-            // Mostrar mensaje de éxito
+            // Obtener el nodo raíz del árbol de expresión actualizado después del análisis
+            Nodo nodoRaiz = arbolExpresion.getRaiz(); // Esto debería ser el nodo raíz del árbol actualizado
+
+            // Verificar si el árbol tiene un nodo raíz válido
+            if (nodoRaiz != null) {
+                // Actualizar el VennDiagramPanel con el nuevo árbol de expresión
+                vennDiagramPanel.setArbolExpresion(arbolExpresion);  // Asignar el árbol de expresión al panel
+                vennDiagramPanel.repaint();  // Repintar el panel para reflejar el nuevo árbol de expresión
+            } else {
+                System.out.println("El árbol de expresión no tiene un nodo raíz válido.");
+            }
+
             JOptionPane.showMessageDialog(this, "Análisis léxico y sintáctico completado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
-            // Manejo de cualquier otro error
             e.printStackTrace();
             SwingUtilities.invokeLater(() -> {
                 Salida.setText("Ocurrió un error durante el análisis: " + e.getMessage());
             });
             JOptionPane.showMessageDialog(this, "Ocurrió un error durante el análisis: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+
     }//GEN-LAST:event_AnalisisExcecuteActionPerformed
 
     private void generarYGuardarReportes(AnalizadorLexico lexer, Parser parser) {
@@ -467,6 +528,30 @@ public class Inicio extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_saveAsActionPerformed
 
+    private void JpanelGraphPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_JpanelGraphPropertyChange
+        // TODO add your handling code here:
+    }//GEN-LAST:event_JpanelGraphPropertyChange
+
+    private void previousButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousButtonActionPerformed
+        // TODO add your handling code here:
+        // Verificar si hay operaciones y si no estamos en la primera operación
+            if (arbolesExpresion != null && currentOperationIndex > 0) {
+            currentOperationIndex--;
+            System.out.println("Navegando a árbol de expresión anterior: índice " + currentOperationIndex);
+            updateVennDiagramPanel(); // Llama al método para actualizar el panel
+        }
+    }//GEN-LAST:event_previousButtonActionPerformed
+
+    private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
+        // TODO add your handling code here:
+        // Verificar si hay árboles y si no estamos en el último árbol
+        if (arbolesExpresion != null && currentOperationIndex < arbolesExpresion.size() - 1) {
+            currentOperationIndex++;
+            System.out.println("Navegando a siguiente árbol de expresión: índice " + currentOperationIndex);
+            updateVennDiagramPanel(); // Llama al método para actualizar el panel
+        }
+    }//GEN-LAST:event_nextButtonActionPerformed
+
     private void abrirReporte(String filePath) {
         try {
             // Abrir el archivo HTML en el navegador predeterminado del sistema
@@ -515,6 +600,7 @@ public class Inicio extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem AnalisisExcecute;
     private javax.swing.JMenu Archivo;
+    private javax.swing.JPanel JpanelGraph;
     private javax.swing.JMenuItem LexerErr;
     private javax.swing.JMenuItem NewFile;
     private javax.swing.JMenu Reportes;
@@ -526,12 +612,11 @@ public class Inicio extends javax.swing.JFrame {
     private javax.swing.JLabel entrada1;
     private javax.swing.JLabel entrada2;
     private javax.swing.JMenu excecute;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JButton nextButton;
+    private javax.swing.JButton previousButton;
     private javax.swing.JMenuItem save;
     private javax.swing.JMenuItem saveAs;
     // End of variables declaration//GEN-END:variables
