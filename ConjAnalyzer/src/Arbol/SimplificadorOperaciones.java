@@ -1,20 +1,11 @@
 package Arbol;
 
-import java.util.HashSet;
-import java.util.Set;
 import Conjuntos.ConjuntoManager;
+import Leyes.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.json.JSONObject;
-import Leyes.*;
-import java.util.Arrays;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 
 public class SimplificadorOperaciones {
     private ConjuntoManager conjuntoManager;
@@ -25,70 +16,80 @@ public class SimplificadorOperaciones {
         this.conjuntoManager = conjuntoManager;
         this.leyesAplicadasPorOperacion = new HashMap<>();
         this.leyes = Arrays.asList(
-            new Absorcion(), 
-            new Asociativa(), 
-            new Conmutativa(), 
-            new DeMorgan(), 
-            new Distributiva(), 
-            new DobleComplemento(), 
+            new Absorcion(),
+            new Asociativa(),
+            new Conmutativa(),
+            new DeMorgan(),
+            new Distributiva(),
+            new DobleComplemento(),
             new Idempotente()
         );
     }
 
-    // Método para simplificar un árbol y guardar el árbol simplificado en el objeto ArbolExpresion
     public Nodo simplificar(Nodo nodo, String nombreOperacion) {
         Set<String> estadosVisitados = new HashSet<>();
+        Map<String, Nodo> cacheSimplificaciones = new HashMap<>();
         List<String> leyesAplicadas = new ArrayList<>();
-        Nodo resultadoSimplificado = simplificarRecursivo(nodo, estadosVisitados, leyesAplicadas);
+        boolean cambios;
+
+        // Realiza múltiples pasadas de simplificación hasta que no haya más cambios
+        do {
+            cambios = false;
+            Nodo resultadoSimplificado = simplificarRecursivo(nodo, estadosVisitados, cacheSimplificaciones, leyesAplicadas);
+            
+            // Verificar si se hicieron cambios
+            if (!resultadoSimplificado.equals(nodo)) {
+                cambios = true;
+                nodo = resultadoSimplificado;
+            }
+        } while (cambios);
 
         // Guardar las leyes aplicadas por la operación
         leyesAplicadasPorOperacion.put(nombreOperacion, leyesAplicadas);
 
-        return resultadoSimplificado;
+        return nodo;
     }
 
-    private Nodo simplificarRecursivo(Nodo nodo, Set<String> estadosVisitados, List<String> leyesAplicadas) {
+    private Nodo simplificarRecursivo(Nodo nodo, Set<String> estadosVisitados, Map<String, Nodo> cacheSimplificaciones, List<String> leyesAplicadas) {
         String representacionNodo = nodo.mostrarContenido();
-        if (estadosVisitados.contains(representacionNodo)) {
-            System.out.println("Ciclo detectado, deteniendo simplificación para: " + representacionNodo);
-            return nodo;
+        if (cacheSimplificaciones.containsKey(representacionNodo)) {
+            return cacheSimplificaciones.get(representacionNodo);
         }
 
         // Marcar el nodo como visitado
         estadosVisitados.add(representacionNodo);
 
-        // Simplificar recursivamente los nodos hijos si es un nodo binario
-        if (nodo instanceof NodoBinario) {
-            NodoBinario operacion = (NodoBinario) nodo;
+        // Simplificar recursivamente el nodo y sus hijos
+        nodo = simplificarNodo(nodo, estadosVisitados, leyesAplicadas);
 
-            // Aplicar simplificación recursiva a los hijos
-            Nodo izquierdoSimplificado = simplificarRecursivo(operacion.getIzquierdo(), new HashSet<>(estadosVisitados), leyesAplicadas);
-            Nodo derechoSimplificado = simplificarRecursivo(operacion.getDerecho(), new HashSet<>(estadosVisitados), leyesAplicadas);
+        // Aplicar leyes de simplificación al nodo actual
+        Nodo nodoSimplificado = aplicarLeyesProfundas(nodo, leyesAplicadas, estadosVisitados, cacheSimplificaciones);
 
-            // Reconstruir el nodo binario simplificado
-            NodoBinario operacionSimplificada = new NodoBinario(operacion.getOperador(), izquierdoSimplificado, derechoSimplificado);
-            Nodo nodoResultado = aplicarLeyes(operacionSimplificada, leyesAplicadas, estadosVisitados);
-
-            return nodoResultado;
-
-        } else if (nodo instanceof NodoUnario) {
-            NodoUnario operacion = (NodoUnario) nodo;
-
-            // Aplicar simplificación recursiva al operando
-            Nodo operandoSimplificado = simplificarRecursivo(operacion.getOperand(), new HashSet<>(estadosVisitados), leyesAplicadas);
-
-            // Reconstruir el nodo unario simplificado
-            NodoUnario operacionSimplificada = new NodoUnario(operacion.getOperador(), operandoSimplificado);
-            Nodo nodoResultado = aplicarLeyes(operacionSimplificada, leyesAplicadas, estadosVisitados);
-
-            return nodoResultado;
+        // Marcar nodo como simplificado si no hay más leyes aplicables
+        if (nodoSimplificado.equals(nodo)) {
+            nodoSimplificado.setSimplificado(true);
         }
 
-        // Si es un nodo de conjunto o un nodo que no requiere simplificación adicional
+        // Almacenar el resultado en el cache
+        cacheSimplificaciones.put(representacionNodo, nodoSimplificado);
+        return nodoSimplificado;
+    }
+
+    private Nodo simplificarNodo(Nodo nodo, Set<String> estadosVisitados, List<String> leyesAplicadas) {
+        if (nodo instanceof NodoBinario) {
+            NodoBinario operacion = (NodoBinario) nodo;
+            Nodo izquierdoSimplificado = simplificarRecursivo(operacion.getIzquierdo(), new HashSet<>(estadosVisitados), new HashMap<>(), leyesAplicadas);
+            Nodo derechoSimplificado = simplificarRecursivo(operacion.getDerecho(), new HashSet<>(estadosVisitados), new HashMap<>(), leyesAplicadas);
+            return new NodoBinario(operacion.getOperador(), izquierdoSimplificado, derechoSimplificado);
+        } else if (nodo instanceof NodoUnario) {
+            NodoUnario operacion = (NodoUnario) nodo;
+            Nodo operandoSimplificado = simplificarRecursivo(operacion.getOperand(), new HashSet<>(estadosVisitados), new HashMap<>(), leyesAplicadas);
+            return new NodoUnario(operacion.getOperador(), operandoSimplificado);
+        }
         return nodo;
     }
 
-    private Nodo aplicarLeyes(Nodo nodo, List<String> leyesAplicadas, Set<String> estadosVisitados) {
+    private Nodo aplicarLeyesProfundas(Nodo nodo, List<String> leyesAplicadas, Set<String> estadosVisitados, Map<String, Nodo> cacheSimplificaciones) {
         boolean seAplicoLey;
         int iteraciones = 0;
         Set<String> leyesAplicadasAesteNodo = new HashSet<>();
@@ -111,8 +112,10 @@ public class SimplificadorOperaciones {
                 }
             }
 
-            if (++iteraciones > 50) { // Limitar a 50 iteraciones para prevenir bucles infinitos
-                System.out.println("Límite de iteraciones alcanzado, deteniendo simplificación.");
+            if (!seAplicoLey || ++iteraciones > 50) { // Limitar a 50 iteraciones para prevenir bucles infinitos
+                if (iteraciones > 50) {
+                    System.out.println("Límite de iteraciones alcanzado, deteniendo simplificación.");
+                }
                 break;
             }
 
