@@ -1,8 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Conjuntos;
+
+import Arbol.Nodo;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.HashMap;
@@ -17,6 +17,7 @@ public class ConjuntoManager {
     public static class Operacion {
         private String notacion;
         private Set<Character> conjuntoResultante;
+        private Nodo nodoOperacion; 
 
         public Operacion(String notacion, Set<Character> conjuntoResultante) {
             this.notacion = notacion;
@@ -30,6 +31,10 @@ public class ConjuntoManager {
         public Set<Character> getConjuntoResultante() {
             return conjuntoResultante;
         }
+
+        public Nodo getNodo() {
+            return nodoOperacion;
+        }
     }
 
     private Map<String, Set<Character>> conjuntos;
@@ -38,6 +43,18 @@ public class ConjuntoManager {
     public ConjuntoManager() {
         this.conjuntos = new HashMap<>();
         this.operaciones = new HashMap<>();
+    }
+    
+    // Método para obtener el índice de un conjunto por su nombre
+    public int obtenerIndiceConjunto(String nombreConjunto) {
+        int index = 0;
+        for (String nombre : conjuntos.keySet()) {
+            if (nombre.equals(nombreConjunto)) {
+                return index;
+            }
+            index++;
+        }
+        throw new IllegalArgumentException("Conjunto no encontrado: " + nombreConjunto);
     }
 
     // Generar un conjunto a partir de un rango, por ejemplo, 'a'~'z' o '0'~'4'
@@ -73,6 +90,7 @@ public class ConjuntoManager {
     public Set<Character> obtenerConjunto(String nombre) {
         return conjuntos.get(nombre);
     }
+    
     // Guardar una operación realizada junto con su nombre, notación y conjunto resultante
     public void guardarOperacion(String nombreOperacion, String notacion, Set<Character> conjuntoResultante) {
         operaciones.put(nombreOperacion, new Operacion(notacion, conjuntoResultante));
@@ -124,9 +142,9 @@ public class ConjuntoManager {
         return resultado.toString();
     }
 
-    
     // Método para obtener todas las operaciones
     public Map<String, Operacion> getOperacionesMap() {
         return operaciones;
     }
+
 }
