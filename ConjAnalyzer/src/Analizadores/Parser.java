@@ -13,6 +13,8 @@ import Arbol.SimplificadorOperaciones;
 import Componentes.SyntaxError;
 import Interfaz.OutputManager;
 import java.util.Stack;
+import Interfaz.Inicio;
+import javax.swing.SwingUtilities;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
@@ -161,19 +163,21 @@ public class Parser extends java_cup.runtime.lr_parser {
 
 
 
+        private Inicio inicio; 
         private List<SyntaxError> syntaxErrors = new ArrayList<>();
         private OutputManager outputManager;
         private ConjuntoManager conjuntoManager;
         private SimplificadorOperaciones simplificador;
-        private ArbolPrefijo arbolPrefijo;
+        private ArbolExpresion arbolExpresion;
 
-        public Parser(AnalizadorLexico lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolPrefijo arbolPrefijo) {
+            public Parser(AnalizadorLexico lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolExpresion arbolExpresion, Inicio inicio) {
             super(lexer);
             this.outputManager = outputManager;
-            this.conjuntoManager = conjuntoManager;  
+            this.conjuntoManager = conjuntoManager;
             this.simplificador = simplificador;
-            this.arbolPrefijo = arbolPrefijo; 
-            this.init_actions(); 
+            this.arbolExpresion = arbolExpresion;
+            this.inicio = inicio;  // Inicializar la variable de instancia
+            this.init_actions();
         }
 
    public void syntax_error(Symbol s) {
@@ -524,30 +528,51 @@ class CUP$Parser$actions {
 		int flechaleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
 		int flecharight = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
 		Object flecha = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
-		int tokensleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
-		int tokensright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
-		List<String> tokens = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int raizleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int raizright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		Nodo raiz = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		int puntoleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int puntoright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object punto = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
+    {
     try {
-        Nodo arbol = arbolPrefijo.construirArbol(tokens);
-        Nodo arbolSimplificado = simplificador.simplificar(arbol, id);
+        // Crear un nuevo árbol de expresión
+        ArbolExpresion nuevoArbol = new ArbolExpresion();
+        nuevoArbol.construir(raiz); // Construir el árbol a partir de la operación tokens
+
+        // Simplificar el árbol y obtener el nodo raíz simplificado
+        Nodo arbolSimplificado = simplificador.simplificar(nuevoArbol.getRaiz(), id);
+
+        // Guardar el árbol simplificado en el objeto ArbolExpresion
+        nuevoArbol.setRaizSimplificada(arbolSimplificado);
+
+        // Evaluar el resultado de la operación simplificada
         Set<Character> resultado = arbolSimplificado.evaluar();
+
+        // Mostrar el contenido del árbol original
+        System.out.println("Contenido del árbol:");
+        System.out.println(nuevoArbol.mostrarContenido());
+
+        // Guardar la operación simplificada en el ConjuntoManager
         conjuntoManager.guardarOperacion(id, arbolSimplificado.mostrarContenido(), resultado);
+
+        // Agregar el árbol a la lista en 'Inicio'
+        inicio.arbolesExpresion.add(nuevoArbol);
+
+        // Imprimir información adicional para depuración
         System.out.println("Operación '" + id + "' simplificada y guardada.");
         System.out.println("Árbol de operación simplificada: " + arbolSimplificado);
         System.out.println("Resultado de la operación: " + resultado);
         System.out.println("------------------------------------");
         System.out.println(conjuntoManager.getOperaciones());
-
     } catch (Exception e) {
         String message = "Error al definir operación '" + id + "': " + e.getMessage();
         System.err.println(message);
         outputManager.addErrorOutput(message);
         syntaxErrors.add(new SyntaxError(operaleft, puntoright, e.getMessage(), "Error en la Definición de Operación"));
     }
+}
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("DefinicionOperacion",4, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -556,23 +581,21 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 14: // OperacionTokens ::= DIFERENCIA OperacionTokens OperacionTokens 
             {
-              List<String> RESULT =null;
+              Nodo RESULT =null;
 		int difleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
 		int difright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
 		Object dif = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
 		int op1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
 		int op1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
-		List<String> op1 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		Nodo op1 = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		int op2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int op2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		List<String> op2 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		Nodo op2 = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>();
-    tokens.add("-");  // Primero se añade el operador para notación prefija
-    tokens.addAll(op1); // Luego el primer operando
-    tokens.addAll(op2); // Luego el segundo operando
-    RESULT = tokens;
-    System.out.println("Token de diferencia añadido: " + tokens);
+    // Crear un nodo binario para la operación de diferencia
+    Nodo nodo = new NodoBinario("-", op1, op2);
+    RESULT = nodo; // Asignar el nodo creado al resultado de la producción
+    System.out.println("Nodo de diferencia creado: " + nodo);
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OperacionTokens",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -581,23 +604,21 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 15: // OperacionTokens ::= UNION OperacionTokens OperacionTokens 
             {
-              List<String> RESULT =null;
+              Nodo RESULT =null;
 		int unionleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
 		int unionright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
 		Object union = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
 		int op1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
 		int op1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
-		List<String> op1 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		Nodo op1 = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		int op2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int op2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		List<String> op2 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		Nodo op2 = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>();
-    tokens.add("U");  // Primero el operador
-    tokens.addAll(op1); // Luego el primer operando
-    tokens.addAll(op2); // Luego el segundo operando
-    RESULT = tokens;
-    System.out.println("Token de unión añadido: " + tokens);
+    // Crear un nodo binario para la operación de unión
+    Nodo nodo = new NodoBinario("U", op1, op2);
+    RESULT = nodo;
+    System.out.println("Nodo de unión creado: " + nodo);
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OperacionTokens",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -606,23 +627,21 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 16: // OperacionTokens ::= INTERSECCION OperacionTokens OperacionTokens 
             {
-              List<String> RESULT =null;
+              Nodo RESULT =null;
 		int interleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
 		int interright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
 		Object inter = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
 		int op1left = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
 		int op1right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
-		List<String> op1 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		Nodo op1 = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		int op2left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int op2right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		List<String> op2 = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		Nodo op2 = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>();
-    tokens.add("&");  // Primero el operador
-    tokens.addAll(op1); // Luego el primer operando
-    tokens.addAll(op2); // Luego el segundo operando
-    RESULT = tokens;
-    System.out.println("Token de intersección añadido: " + tokens);
+    // Crear un nodo binario para la operación de intersección
+    Nodo nodo = new NodoBinario("&", op1, op2);
+    RESULT = nodo;
+    System.out.println("Nodo de intersección creado: " + nodo);
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OperacionTokens",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -631,19 +650,18 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 17: // OperacionTokens ::= COMPLEMENTO OperacionTokens 
             {
-              List<String> RESULT =null;
+              Nodo RESULT =null;
 		int complleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
 		int complright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		Object compl = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		int opleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int opright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		List<String> op = (List<String>)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		Nodo op = (Nodo)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    List<String> tokens = new ArrayList<>();
-    tokens.add("^");  // Primero el operador
-    tokens.addAll(op); // Luego el operando
-    RESULT = tokens;
-    System.out.println("Token de complemento añadido: " + tokens);
+    // Crear un nodo unario para la operación de complemento
+    Nodo nodo = new NodoUnario("^", op);
+    RESULT = nodo;
+    System.out.println("Nodo de complemento creado: " + nodo);
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OperacionTokens",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -652,15 +670,15 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 18: // OperacionTokens ::= LLAVE_IZQ ID LLAVE_DER 
             {
-              List<String> RESULT =null;
+              Nodo RESULT =null;
 		int idleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
 		int idright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		String id = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-    List<String> tokens = new ArrayList<>();
-    tokens.add(id);  // Solo el identificador del conjunto
-    RESULT = tokens;
-    System.out.println("Identificador de conjunto añadido: " + tokens);
+    // Crear un nodo de conjunto para el identificador de conjunto
+    Nodo nodo = new NodoConjunto(id, conjuntoManager);
+    RESULT = nodo;
+    System.out.println("Nodo de conjunto creado: " + nodo);
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OperacionTokens",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
