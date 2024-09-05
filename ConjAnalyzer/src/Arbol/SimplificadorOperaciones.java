@@ -1,5 +1,8 @@
 package Arbol;
-
+/**
+ *
+ * @author Keneth Lopez
+ */
 import Conjuntos.ConjuntoManager;
 import Leyes.*;
 import java.io.FileWriter;
@@ -11,6 +14,7 @@ public class SimplificadorOperaciones {
     private ConjuntoManager conjuntoManager;
     private Map<String, List<String>> leyesAplicadasPorOperacion;
     private List<Ley> leyes;
+    private static final int MAX_ITERACIONES = 50; 
 
     public SimplificadorOperaciones(ConjuntoManager conjuntoManager) {
         this.conjuntoManager = conjuntoManager;
@@ -31,27 +35,53 @@ public class SimplificadorOperaciones {
         Map<String, Nodo> cacheSimplificaciones = new HashMap<>();
         List<String> leyesAplicadas = new ArrayList<>();
         boolean cambios;
+        int iteraciones = 0;
 
-        // Realiza múltiples pasadas de simplificación hasta que no haya más cambios
+        int complejidadInicial = nodo.calcularComplejidad();
+        int maxIteracionesAdaptativo = Math.max(complejidadInicial * 10, MAX_ITERACIONES);
+        int maxSinProgreso = 5; 
+        int sinProgreso = 0;
+        int complejidadPrev = complejidadInicial;
+        Nodo mejorSimplificacion = nodo;
+
         do {
             cambios = false;
             Nodo resultadoSimplificado = simplificarRecursivo(nodo, estadosVisitados, cacheSimplificaciones, leyesAplicadas);
-            
-            // Verificar si se hicieron cambios
+
             if (!resultadoSimplificado.equals(nodo)) {
                 cambios = true;
                 nodo = resultadoSimplificado;
+
+                int nuevaComplejidad = nodo.calcularComplejidad();
+
+                // Control de expansión
+                if (nuevaComplejidad > complejidadPrev) {
+                    sinProgreso++;
+                    if (sinProgreso >= maxSinProgreso) {
+                        return mejorSimplificacion; // Revertir a la mejor simplificación
+                    }
+                } else {
+                    sinProgreso = 0; // Reinicia si hay progreso
+                    mejorSimplificacion = nodo; // Actualiza la mejor simplificación
+                }
+
+                complejidadPrev = nuevaComplejidad; // Actualiza la complejidad anterior
             }
-        } while (cambios);
 
-        // Guardar las leyes aplicadas por la operación
+            iteraciones++;
+        } while (cambios && iteraciones < maxIteracionesAdaptativo);
+
         leyesAplicadasPorOperacion.put(nombreOperacion, leyesAplicadas);
-
         return nodo;
     }
 
     private Nodo simplificarRecursivo(Nodo nodo, Set<String> estadosVisitados, Map<String, Nodo> cacheSimplificaciones, List<String> leyesAplicadas) {
         String representacionNodo = nodo.mostrarContenido();
+
+        // Verifica si el nodo ya está simplificado o está en el cache, devolverlo
+        if (nodo.isSimplificado()) {
+            return nodo;
+        }
         if (cacheSimplificaciones.containsKey(representacionNodo)) {
             return cacheSimplificaciones.get(representacionNodo);
         }
@@ -60,30 +90,29 @@ public class SimplificadorOperaciones {
         estadosVisitados.add(representacionNodo);
 
         // Simplificar recursivamente el nodo y sus hijos
-        nodo = simplificarNodo(nodo, estadosVisitados, leyesAplicadas);
+        nodo = simplificarNodo(nodo, estadosVisitados, cacheSimplificaciones, leyesAplicadas);
 
         // Aplicar leyes de simplificación al nodo actual
         Nodo nodoSimplificado = aplicarLeyesProfundas(nodo, leyesAplicadas, estadosVisitados, cacheSimplificaciones);
 
-        // Marcar nodo como simplificado si no hay más leyes aplicables
-        if (nodoSimplificado.equals(nodo)) {
-            nodoSimplificado.setSimplificado(true);
-        }
-
         // Almacenar el resultado en el cache
         cacheSimplificaciones.put(representacionNodo, nodoSimplificado);
+
+        // Marcar el nodo como simplificado
+        nodo.setSimplificado(true);
+
         return nodoSimplificado;
     }
 
-    private Nodo simplificarNodo(Nodo nodo, Set<String> estadosVisitados, List<String> leyesAplicadas) {
+    private Nodo simplificarNodo(Nodo nodo, Set<String> estadosVisitados, Map<String, Nodo> cacheSimplificaciones, List<String> leyesAplicadas) {
         if (nodo instanceof NodoBinario) {
             NodoBinario operacion = (NodoBinario) nodo;
-            Nodo izquierdoSimplificado = simplificarRecursivo(operacion.getIzquierdo(), new HashSet<>(estadosVisitados), new HashMap<>(), leyesAplicadas);
-            Nodo derechoSimplificado = simplificarRecursivo(operacion.getDerecho(), new HashSet<>(estadosVisitados), new HashMap<>(), leyesAplicadas);
+            Nodo izquierdoSimplificado = simplificarRecursivo(operacion.getIzquierdo(), new HashSet<>(estadosVisitados), cacheSimplificaciones, leyesAplicadas);
+            Nodo derechoSimplificado = simplificarRecursivo(operacion.getDerecho(), new HashSet<>(estadosVisitados), cacheSimplificaciones, leyesAplicadas);
             return new NodoBinario(operacion.getOperador(), izquierdoSimplificado, derechoSimplificado);
         } else if (nodo instanceof NodoUnario) {
             NodoUnario operacion = (NodoUnario) nodo;
-            Nodo operandoSimplificado = simplificarRecursivo(operacion.getOperand(), new HashSet<>(estadosVisitados), new HashMap<>(), leyesAplicadas);
+            Nodo operandoSimplificado = simplificarRecursivo(operacion.getOperand(), new HashSet<>(estadosVisitados), cacheSimplificaciones, leyesAplicadas);
             return new NodoUnario(operacion.getOperador(), operandoSimplificado);
         }
         return nodo;
@@ -108,14 +137,13 @@ public class SimplificadorOperaciones {
                         leyesAplicadasAesteNodo.add(ley.getClass().getSimpleName());
                         seAplicoLey = true;
                         break;
+                    } else {
                     }
                 }
             }
 
-            if (!seAplicoLey || ++iteraciones > 50) { // Limitar a 50 iteraciones para prevenir bucles infinitos
-                if (iteraciones > 50) {
-                    System.out.println("Límite de iteraciones alcanzado, deteniendo simplificación.");
-                }
+            iteraciones++;
+            if (iteraciones > MAX_ITERACIONES) {
                 break;
             }
 
@@ -149,9 +177,10 @@ public class SimplificadorOperaciones {
         }
 
         try (FileWriter file = new FileWriter(rutaArchivo)) {
-            file.write(json.toString(4)); // Indentado para mejor legibilidad
+            file.write(json.toString(4));
             System.out.println("Archivo JSON generado exitosamente en: " + rutaArchivo);
         } catch (IOException e) {
+            System.err.println("Error al generar el archivo JSON: " + e.getMessage());
             e.printStackTrace();
         }
     }
