@@ -1,0 +1,82 @@
+// **Definición de Terminales**
+<LLAVE_IZQ> ::= "{"              // Símbolo de llave izquierda
+<LLAVE_DER> ::= "}"              // Símbolo de llave derecha
+<DOSPUNTOS> ::= ":"              // Símbolo de dos puntos
+<FLECHA> ::= "->"                // Símbolo de flecha
+<PUNTOYCOMA> ::= ";"             // Símbolo de punto y coma
+<UNION> ::= "U"                  // Símbolo de unión
+<INTERSECCION> ::= "&"           // Símbolo de intersección
+<DIFERENCIA> ::= "-"             // Símbolo de diferencia
+<COMPLEMENTO> ::= "^"            // Símbolo de complemento
+<PAR_IZQ> ::= "("                // Símbolo de paréntesis izquierdo
+<PAR_DER> ::= ")"                // Símbolo de paréntesis derecho
+<COMA> ::= ","                   // Símbolo de coma
+<HASTA> ::= ".."                 // Símbolo que indica un rango
+<ID> ::= [a-zA-Z_][a-zA-Z0-9_]*  // Identificador válido
+<CONJUNTO> ::= "{" [a-zA-Z0-9,]* "}" // Representación de un conjunto literal
+<ELEMENTOS_EVALUAR> ::= "{" [a-zA-Z0-9,]* "}" // Elementos a evaluar
+
+// Terminales para palabras reservadas
+<CONJ> ::= "CONJ"                // Palabra reservada para definir conjuntos
+<OPERA> ::= "OPERA"              // Palabra reservada para definir operaciones
+<EVALUAR> ::= "EVALUAR"          // Palabra reservada para evaluar operaciones
+
+// **Definición de No Terminales**
+
+// Definición del no terminal <Programa>
+<Programa> ::= <LLAVE_IZQ> <Sentencias> <LLAVE_DER>
+// Un programa consiste en un bloque de sentencias delimitado por llaves
+
+// Definición del no terminal <Sentencias>
+<Sentencias> ::= <Sentencia> <Sentencias>
+               | /* vacío */
+// Una secuencia de sentencias es una o más sentencias consecutivas, o puede estar vacía
+
+// Definición del no terminal <Sentencia>
+<Sentencia> ::= <DefinicionConjunto>
+              | <DefinicionOperacion>
+              | <Evaluacion>
+              | <Conjunto>
+              | error <PUNTOYCOMA>
+// Una sentencia puede ser una definición de conjunto, operación, evaluación, un conjunto o un error seguido de punto y coma
+
+/*
+================================= CONJUNTOS ======================================================
+*/
+
+// Definición del no terminal <DefinicionConjunto>
+<DefinicionConjunto> ::= <CONJ> <DOSPUNTOS> <ID> <FLECHA> <Conjunto> <PUNTOYCOMA>
+// Define un conjunto y lo asocia con un identificador
+
+// Definición del no terminal <Conjunto>
+<Conjunto> ::= <Rango>
+             | <CONJUNTO>
+// Un conjunto puede ser un rango o un conjunto literal
+
+// Definición del no terminal <Rango>
+<Rango> ::= <CONJUNTO> <HASTA> <CONJUNTO>
+// Un rango de conjuntos que se define desde un conjunto inicial hasta un conjunto final
+
+/*
+================================= OPERACIONES ======================================================
+*/
+
+// Definición del no terminal <DefinicionOperacion>
+<DefinicionOperacion> ::= <OPERA> <DOSPUNTOS> <ID> <FLECHA> <OperacionTokens> <PUNTOYCOMA>
+// Define una operación y la asocia con un identificador
+
+// Definición del no terminal <OperacionTokens>
+<OperacionTokens> ::= <DIFERENCIA> <OperacionTokens> <OperacionTokens>
+                    | <UNION> <OperacionTokens> <OperacionTokens>
+                    | <INTERSECCION> <OperacionTokens> <OperacionTokens>
+                    | <COMPLEMENTO> <OperacionTokens>
+                    | <LLAVE_IZQ> <ID> <LLAVE_DER>
+// Operaciones sobre conjuntos, incluyendo diferencia, unión, intersección y complemento
+
+/*
+================================= EVALUACION ======================================================
+*/
+
+// Definición del no terminal <Evaluacion>
+<Evaluacion> ::= <EVALUAR> <PAR_IZQ> <ELEMENTOS_EVALUAR> <COMA> <ID> <PAR_DER> <PUNTOYCOMA>
+// La evaluación de una expresión toma un conjunto de elementos y un identificador para verificar su pertenencia
