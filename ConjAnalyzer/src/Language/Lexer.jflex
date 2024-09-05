@@ -33,7 +33,7 @@ import java.util.ArrayList;
     }
 %}
 
-%class AnalizadorLexico
+%class Lexer
 %public
 %line
 %column

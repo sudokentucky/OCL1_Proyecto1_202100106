@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 
 @SuppressWarnings("fallthrough")
-public class AnalizadorLexico implements java_cup.runtime.Scanner {
+public class Lexer implements java_cup.runtime.Scanner {
 
   /** This character denotes the end of file. */
   public static final int YYEOF = -1;
@@ -351,7 +351,7 @@ public class AnalizadorLexico implements java_cup.runtime.Scanner {
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  public AnalizadorLexico(java.io.Reader in) {
+  public Lexer(java.io.Reader in) {
       yyline = 1;
     yycolumn = 1;
     this.zzReader = in;

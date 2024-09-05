@@ -170,7 +170,7 @@ public class Parser extends java_cup.runtime.lr_parser {
         private SimplificadorOperaciones simplificador;
         private ArbolExpresion arbolExpresion;
 
-            public Parser(AnalizadorLexico lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolExpresion arbolExpresion, Inicio inicio) {
+            public Parser(Lexer lexer, OutputManager outputManager, ConjuntoManager conjuntoManager, SimplificadorOperaciones simplificador, ArbolExpresion arbolExpresion, Inicio inicio) {
             super(lexer);
             this.outputManager = outputManager;
             this.conjuntoManager = conjuntoManager;

@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Interfaz;
-import Analizadores.AnalizadorLexico;
+import Analizadores.Lexer;
 import Analizadores.Parser;
 import Analizadores.sym;
 import Arbol.*;
@@ -380,7 +380,7 @@ public class Inicio extends javax.swing.JFrame {
     StringReader sr = new StringReader(textoEntrada);
 
     // Analisis Lexico
-    AnalizadorLexico lexer = new AnalizadorLexico(sr);
+    Lexer lexer = new Lexer(sr);
 
     try {
         Symbol token;
@@ -404,7 +404,7 @@ public class Inicio extends javax.swing.JFrame {
 
     // Realizar Parseo
     sr = new StringReader(textoEntrada);  // Reinicializar el StringReader
-    lexer = new AnalizadorLexico(sr);  // Reiniciar el lexer
+    lexer = new Lexer(sr);  // Reiniciar el lexer
     parser = new Parser(lexer, outputManager, conjuntoManager, simplificador, arbolExpresion, this);
 
     try {
@@ -445,7 +445,7 @@ public class Inicio extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "Análisis sintáctico completado. Revise los reportes para más detalles.", "Completado", JOptionPane.INFORMATION_MESSAGE);
     }
     }//GEN-LAST:event_AnalisisExcecuteActionPerformed
-    private void generarYGuardarReportesLexer(AnalizadorLexico lexer) {
+    private void generarYGuardarReportesLexer(Lexer lexer) {
         // Obtener tokens y errores del lexer
         List<Token> tokens = lexer.getTokens();
         List<LexicalError> lexicalErrors = lexer.getErrors();
