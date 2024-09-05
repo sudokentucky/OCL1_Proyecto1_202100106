@@ -7,10 +7,8 @@ import Componentes.SyntaxError;
 import Componentes.Token;
 import java.io.FileReader;
 import java.util.List;
-import Interfaz.OutputManager;
 import Arbol.SimplificadorOperaciones;
-import Conjuntos.ConjuntoManager; 
-
+import Conjuntos.ConjuntoManager;
 
 /**
  *

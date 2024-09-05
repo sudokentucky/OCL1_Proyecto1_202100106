@@ -1,5 +1,8 @@
 package Conjuntos;
-
+/**
+ *
+ * @author Keneth Lopez
+ */
 import Arbol.Nodo;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -8,10 +11,6 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author Keneth Lopez
- */
 public class ConjuntoManager {
     // Clase interna que representa una operación
     public static class Operacion {

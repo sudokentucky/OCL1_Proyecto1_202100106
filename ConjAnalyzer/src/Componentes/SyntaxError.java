@@ -1,5 +1,8 @@
 package Componentes;
-
+/**
+ *
+ * @author Keneth Lopez
+ */
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
