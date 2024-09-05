@@ -5,6 +5,7 @@
 package Interfaz;
 import Analizadores.AnalizadorLexico;
 import Analizadores.Parser;
+import Analizadores.sym;
 import Arbol.*;
 import java.io.StringReader;
 import Componentes.Token;
@@ -19,18 +20,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java_cup.runtime.Symbol;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JOptionPane;
-
 /**
  *
  * @author Keneth Lopez
  */
-
-
 public class Inicio extends javax.swing.JFrame {
     public List<ArbolExpresion> arbolesExpresion = new ArrayList<>();
     private OutputManager outputManager;
@@ -53,15 +51,10 @@ public class Inicio extends javax.swing.JFrame {
         this.outputManager = new OutputManager();
         this.conjuntoManager = new ConjuntoManager();
         this.simplificador = new SimplificadorOperaciones(conjuntoManager);
-
-        // Crear un nodo raíz inicial para el árbol (por ejemplo, un NodoConjunto vacío)
         Nodo nodoRaizInicial = new NodoConjunto("", conjuntoManager);
-
         // Inicializar el árbol de expresiones con el nodo raíz inicial
         this.arbolExpresion = new ArbolExpresion(nodoRaizInicial);
-
         initComponents();
-
         // Inicializar el VennDiagramPanel con el árbol de expresión
         vennDiagramPanel = new VennDiagramPanel(arbolExpresion, conjuntoManager);
         JpanelGraph.setLayout(new BorderLayout());
@@ -69,10 +62,6 @@ public class Inicio extends javax.swing.JFrame {
         JpanelGraph.revalidate();
         JpanelGraph.repaint();
     }
-
-
-    
-   
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -297,9 +286,7 @@ public class Inicio extends javax.swing.JFrame {
         abrirReporte("tokens_report.html");
 
     }//GEN-LAST:event_TokensActionPerformed
-
     private File currentFile = null;
-
     private void saveToFile(File file) {
         try (FileWriter fileWriter = new FileWriter(file)) {
             // Escribe el contenido del JTextArea en el archivo
@@ -309,7 +296,6 @@ public class Inicio extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al guardar el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
     private void NewFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewFileActionPerformed
         // TODO add your handling code here:
         if (!TextoEnrada.getText().isEmpty()) {
@@ -347,80 +333,122 @@ public class Inicio extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_NewFileActionPerformed
     private void updateVennDiagramPanel() {
-    // Verificar si hay árboles de expresión en la lista
-    if (arbolesExpresion != null && !arbolesExpresion.isEmpty()) {
-        // Verificar que el índice actual esté dentro del rango de la lista de árboles
-        if (currentOperationIndex >= 0 && currentOperationIndex < arbolesExpresion.size()) {
-            // Obtener el árbol correspondiente de la lista de árboles
-            ArbolExpresion arbolActual = arbolesExpresion.get(currentOperationIndex);
+        // Verificar si hay árboles de expresión en la lista
+        if (arbolesExpresion != null && !arbolesExpresion.isEmpty()) {
+            // Verificar que el índice actual esté dentro del rango de la lista de árboles
+            if (currentOperationIndex >= 0 && currentOperationIndex < arbolesExpresion.size()) {
+                ArbolExpresion arbolActual = arbolesExpresion.get(currentOperationIndex);
 
-            // Debug: Imprimir el contenido del árbol actual
-            System.out.println("Mostrando árbol de expresión en índice: " + currentOperationIndex);
-            System.out.println("Contenido del árbol: " + arbolActual.mostrarContenido());
-
-            // Actualizar el árbol de expresión en el panel y repintar
-            vennDiagramPanel.updateDiagram(arbolActual);  // Usa el nuevo método para actualizar el diagrama
+                if (arbolActual.getRaiz() != null) {
+                    vennDiagramPanel.setArbolExpresion(arbolActual);
+                    vennDiagramPanel.repaint();
+                    System.out.println("Árbol de expresión actualizado en VennDiagramPanel.");
+                } else {
+                    System.out.println("No hay árbol de expresión o la raíz es nula, no se dibuja nada.");
+                }
+            } else {
+                System.out.println("Índice de árbol de expresión inválido.");
+            }
         } else {
-            System.out.println("Índice de árbol de expresión inválido.");
+            System.out.println("No hay árboles de expresión para mostrar.");
+            vennDiagramPanel.clear();  
         }
-    } else {
-        System.out.println("No hay árboles de expresión para mostrar.");
     }
-}
 
     private void AnalisisExcecuteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AnalisisExcecuteActionPerformed
-        // Verificar si el JTextArea está vacío antes de proceder
-        if (TextoEnrada.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El área de texto está vacía. Por favor ingrese el código a analizar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
+    if (TextoEnrada.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "El área de texto está vacía. Por favor ingrese el código a analizar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // Reiniciar instancias para un análisis independiente
+    outputManager = new OutputManager();  // Reiniciar OutputManager
+    conjuntoManager = new ConjuntoManager();  // Reiniciar ConjuntoManager
+    simplificador = new SimplificadorOperaciones(conjuntoManager);  // Reiniciar SimplificadorOperaciones
+
+    // Crear un nuevo árbol de expresión con un nodo raíz inicial
+    Nodo nodoRaizInicial = new NodoConjunto("", conjuntoManager);
+    arbolExpresion = new ArbolExpresion(nodoRaizInicial);
+
+    // Limpiar cualquier salida previa
+    Salida.setText("");
+    arbolesExpresion.clear();
+    currentOperationIndex = 0;
+
+    // Inicializar el análisis con el texto de entrada
+    String textoEntrada = TextoEnrada.getText();
+    StringReader sr = new StringReader(textoEntrada);
+
+    // Analisis Lexico
+    AnalizadorLexico lexer = new AnalizadorLexico(sr);
+
+    try {
+        Symbol token;
+        while ((token = lexer.next_token()).sym != sym.EOF) {
+            // Continuar el análisis léxico
         }
-        arbolExpresion.mostrarContenido(); // Mostrar el contenido del árbol para depuración
-        outputManager.clearOutputs();
-        String textoEntrada = TextoEnrada.getText();
-        StringReader sr = new StringReader(textoEntrada);
-        AnalizadorLexico lexer = new AnalizadorLexico(sr);
-        Parser parser = new Parser(lexer, outputManager, conjuntoManager, simplificador, arbolExpresion, this);
+        generarYGuardarReportesLexer(lexer);
 
-        
-        try {
-            parser.parse();
-            arbolExpresion.mostrarContenido(); // Mostrar el contenido del árbol para depuración
-            generarYGuardarReportes(lexer, parser);
-            SwingUtilities.invokeLater(() -> {
-                Salida.setContentType("text/html");
-                Salida.setText(outputManager.getAllOutputs());
-            });
-            arbolExpresion.mostrarContenido(); // Mostrar el contenido del árbol para depuración
-            simplificador.generarJSON("./src/Salidas/operaciones.json");
-
-            // Obtener el nodo raíz del árbol de expresión actualizado después del análisis
-            Nodo nodoRaiz = arbolExpresion.getRaiz(); // Esto debería ser el nodo raíz del árbol actualizado
-
-            // Verificar si el árbol tiene un nodo raíz válido
-            if (nodoRaiz != null) {
-                // Actualizar el VennDiagramPanel con el nuevo árbol de expresión
-                vennDiagramPanel.setArbolExpresion(arbolExpresion);  // Asignar el árbol de expresión al panel
-                vennDiagramPanel.repaint();  // Repintar el panel para reflejar el nuevo árbol de expresión
-            } else {
-                System.out.println("El árbol de expresión no tiene un nodo raíz válido.");
-            }
-
-            JOptionPane.showMessageDialog(this, "Análisis léxico y sintáctico completado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            e.printStackTrace();
-            SwingUtilities.invokeLater(() -> {
-                Salida.setText("Ocurrió un error durante el análisis: " + e.getMessage());
-            });
-            JOptionPane.showMessageDialog(this, "Ocurrió un error durante el análisis: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        // Informar sobre errores léxicos, pero no detener el flujo
+        if (!lexer.getErrors().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Errores léxicos encontrados. Revise el reporte de errores léxicos.", "Errores Léxicos", JOptionPane.ERROR_MESSAGE);
         }
 
+    } catch (Exception e) {
+        e.printStackTrace();
+        SwingUtilities.invokeLater(() -> {
+            Salida.setText("Ocurrió un error durante el análisis léxico: " + e.getMessage());
+        });
+        JOptionPane.showMessageDialog(this, "Ocurrió un error durante el análisis léxico: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    // Realizar Parseo
+    sr = new StringReader(textoEntrada);  // Reinicializar el StringReader
+    lexer = new AnalizadorLexico(sr);  // Reiniciar el lexer
+    parser = new Parser(lexer, outputManager, conjuntoManager, simplificador, arbolExpresion, this);
+
+    try {
+        parser.parse();  // Realizar el análisis sintáctico
+
+        // Guardar Reportes
+        if (parser != null) {
+            generarYGuardarReportesParser(parser);
+            simplificador.generarJSON("./src/Salidas/operaciones.json"); // Generar JSON de Operaciones
+        } else {
+            System.err.println("El parser no fue inicializado correctamente.");
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        SwingUtilities.invokeLater(() -> {
+            Salida.setText("Ocurrió un error durante el análisis sintáctico: " + e.getMessage());
+        });
+        JOptionPane.showMessageDialog(this, "Ocurrió un error crítico durante el análisis sintáctico: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    } finally {
+        // Mostrar todas las salidas acumuladas en OutputManager
+        SwingUtilities.invokeLater(() -> {
+            Salida.setContentType("text/html");
+            Salida.setText(outputManager.getAllOutputs());
+        });
+
+        // Actualizar el panel de diagramas si el árbol de expresión tiene una raíz válida
+        Nodo nodoRaiz = arbolExpresion.getRaiz();
+        if (nodoRaiz != null) {
+            arbolesExpresion.add(arbolExpresion);
+            vennDiagramPanel.setArbolExpresion(arbolExpresion);
+            vennDiagramPanel.repaint();
+            updateVennDiagramPanel();
+        } else {
+            System.out.println("El árbol de expresión no tiene un nodo raíz válido.");
+        }
+
+        JOptionPane.showMessageDialog(this, "Análisis sintáctico completado. Revise los reportes para más detalles.", "Completado", JOptionPane.INFORMATION_MESSAGE);
+    }
     }//GEN-LAST:event_AnalisisExcecuteActionPerformed
-
-    private void generarYGuardarReportes(AnalizadorLexico lexer, Parser parser) {
-        // Obtener tokens y errores del lexer y parser
+    private void generarYGuardarReportesLexer(AnalizadorLexico lexer) {
+        // Obtener tokens y errores del lexer
         List<Token> tokens = lexer.getTokens();
         List<LexicalError> lexicalErrors = lexer.getErrors();
-        List<SyntaxError> syntaxErrors = parser.getSyntaxErrors();
 
         // Generar y guardar reportes HTML si las listas no están vacías
         if (!tokens.isEmpty()) {
@@ -434,7 +462,13 @@ public class Inicio extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "No se encontraron errores léxicos para generar el reporte.", "Información", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
 
+    private void generarYGuardarReportesParser(Parser parser) {
+        // Obtener errores del parser
+        List<SyntaxError> syntaxErrors = parser.getSyntaxErrors();
+
+        // Generar y guardar reportes HTML si la lista no está vacía
         if (!syntaxErrors.isEmpty()) {
             guardarReporteSyntaxErrors(syntaxErrors);
         } else {
