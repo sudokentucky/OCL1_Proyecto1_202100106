@@ -694,31 +694,33 @@ class CUP$Parser$actions {
 		int puntoright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object punto = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-    // Extraer los elementos de ELEMENTOS_EVALUAR (vienen en la forma "{a, b, c}")
     String elementosStr = elementos;
     elementosStr = elementosStr.substring(1, elementosStr.length() - 1); 
     String[] elementosArray = elementosStr.split(",\\s*"); 
     Set<Character> resultadoOperacion = conjuntoManager.obtenerResultadoOperacion(id);
-    // Verificar si la operación existe
+    
+    // Verificar si la operación existe y manejar nulo
     if (resultadoOperacion == null) {
-        System.err.println("Operación no encontrada: " + id);
-        outputManager.addErrorOutput("Operación no encontrada: " + id);
-        syntaxErrors.add(new SyntaxError(elementosleft, idright, "Operación no encontrada: " + id, "Error en la Evaluación"));
-    }
-    // Evaluar cada elemento contra la operación
-    outputManager.addOutput("===============");
-    outputManager.addOutput("Evaluar: " + id);
-    outputManager.addOutput("===============");
+        String errorMessage = "Operación no encontrada: " + id;
+        System.err.println(errorMessage);
+        outputManager.addErrorOutput(errorMessage);
+        syntaxErrors.add(new SyntaxError(elementosleft, idright, errorMessage, "Error en la Evaluación"));
+    } else {
+        // Continuar con la evaluación si la operación es válida
+        outputManager.addOutput("===============");
+        outputManager.addOutput("Evaluar: " + id);
+        outputManager.addOutput("===============");
 
-    for (String elemento : elementosArray) {
-        elemento = elemento.trim();  // Remueve cualquier espacio alrededor del elemento
-        if (resultadoOperacion.contains(elemento.charAt(0))) {
-            outputManager.addOutput(elemento + " -> exitoso");
-        } else {
-            outputManager.addOutput(elemento + " -> fallo");
+        for (String elemento : elementosArray) {
+            elemento = elemento.trim();  
+            if (resultadoOperacion.contains(elemento.charAt(0))) {
+                outputManager.addOutput(elemento + " -> exitoso");
+            } else {
+                outputManager.addOutput(elemento + " -> fallo");
+            }
         }
+        outputManager.addOutput("===============");
     }
-    outputManager.addOutput("===============");
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("Evaluacion",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
