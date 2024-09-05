@@ -1,6 +1,6 @@
 package Pruebas;
 
-import Analizadores.AnalizadorLexico;
+import Analizadores.Lexer;
 import Analizadores.*;
 import Componentes.LexicalError;
 import Componentes.SyntaxError;
@@ -29,7 +29,7 @@ public class main {
             FileReader fr = new FileReader(rutaarchivo);
 
             // Crear el analizador léxico (lexer)
-            AnalizadorLexico lexer = new AnalizadorLexico(fr);
+            Lexer lexer = new Lexer(fr);
 
             // Crear el analizador sintáctico (parser) con el lexer y outputManager como entrada
             Parser parser = new Parser(lexer); // Asegúrate de que el parser acepte simplificador como argumento
