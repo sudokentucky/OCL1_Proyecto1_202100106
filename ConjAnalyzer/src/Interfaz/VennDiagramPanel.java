@@ -146,7 +146,7 @@ public class VennDiagramPanel extends JPanel {
         Ellipse2D.Double conjuntoCirculo = new Ellipse2D.Double(
                 centro.getX() - radio, centro.getY() - radio, 2 * radio, 2 * radio);
         Area areaConjunto = new Area(conjuntoCirculo);
-        g2d.setColor(new Color(100, 100, 255, 100)); // Color azul con transparencia para áreas de conjunto
+        g2d.setColor(new Color(255, 255, 255, 100));
         g2d.fill(areaConjunto);
         g2d.setColor(Color.BLACK);
         g2d.setStroke(new BasicStroke(2)); 
@@ -243,7 +243,13 @@ public class VennDiagramPanel extends JPanel {
         System.out.println("Árbol de expresión actualizado en VennDiagramPanel.");
         repaint();
     }
-
+    
+    public void clear() {
+        // Limpiar el panel
+        this.removeAll();
+        this.repaint();
+    }
+    
     public void updateDiagram(ArbolExpresion arbol) {
         this.setArbolExpresion(arbol);
     }
