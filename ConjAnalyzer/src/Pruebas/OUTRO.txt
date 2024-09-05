@@ -1,4 +1,7 @@
-
+<! 
+    pongamos a prueba
+    con operaciones entre 3 conjuntos
+!>
     
 {
     # Archivo avanzado
@@ -23,3 +26,4 @@ _ -> fallo
 + -> exitoso
 9 -> fallo
 !>
+

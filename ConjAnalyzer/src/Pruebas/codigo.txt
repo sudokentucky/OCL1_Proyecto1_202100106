@@ -1,16 +1,18 @@
 
 {
     # Definición de conjuntos
-    CONJ : conjuntoA -> a~z;
-    CONJ : conjuntoB -> A~Z;
-    CONJ : conjuntoC -> 0~9;
-    CONJ : conjuntoD -> 1,3,5,A,B,C;
+    CONJ : aA -> a~z;
+    CONJ : bB -> A~Z;
+    CONJ : cC -> 0~9;
+    CONJ : dD -> 1,3,5,A,B,C;
 
     # Definición de operaciones
-    OPERA : operacion1 -> U {conjuntoA} {conjuntoB};
-    OPERA : operacion2 -> & {conjuntoC} {conjuntoD};
-    OPERA : operacion3 -> ^ {conjuntoB};
-    OPERA : operacion4 -> - {conjuntoA} {conjuntoC};
+    OPERA : operacion1 -> & & {cC} {aA} {bB};
+    OPERA : operacion2 -> & {cC} {dD};
+    OPERA : operacion3 -> ^ {bB};
+    OPERA : operacion4 -> - {aA} {cC};
+    OPERA : operacion5 -> & & & {aA} {cC} {bB} {dD};
+    OPERA : operacion6 -> U U U {aA} {cC} {bB} {dD};
 
     # Evaluación de conjuntos
     EVALUAR ( {a, B, 3}, operacion1 );
