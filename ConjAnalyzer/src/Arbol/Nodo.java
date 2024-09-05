@@ -1,10 +1,10 @@
 package Arbol;
-
-import java.awt.Graphics2D;
-import java.awt.geom.Area;
-import java.util.HashSet;
+/*
+ *
+ * @author Keneth Lopez
+ */
 import java.util.Set;
-import math.geom2d.Point2D;
+
 
 public abstract class Nodo {
     private boolean simplificado = false;
@@ -26,8 +26,15 @@ public abstract class Nodo {
     public void setSimplificado(boolean simplificado) {
         this.simplificado = simplificado;
     }
+    //método para calcular la profundidad del nodo
+    public abstract int calcularProfundidad();
+    public abstract int contarNodos();
     
-    // Nuevo método abstracto para recopilar nombres de conjuntos en el nodo y sus hijos
+    public int calcularComplejidad() {
+        return calcularProfundidad() + contarNodos();
+    }
+    
+    //método abstracto para recopilar nombres de conjuntos en el nodo y sus hijos
     public abstract void recopilarConjuntos(Set<String> conjuntos);
 }
 

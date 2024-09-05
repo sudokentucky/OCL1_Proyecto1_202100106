@@ -1,20 +1,16 @@
 package Arbol;
-
+/**
+ *
+ * @author Keneth Lopez
+ */
 import Conjuntos.ConjuntoManager;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import math.geom2d.conic.Circle2D;
 import java.awt.geom.Area;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.util.Set;
-import math.geom2d.Point2D;
 
 public class NodoConjunto extends Nodo {
     private String nombreConjunto;
     private ConjuntoManager conjuntoManager;
-    private Area areaCache; 
+    private Area areaCache;
 
     public NodoConjunto(String nombreConjunto, ConjuntoManager conjuntoManager) {
         this.nombreConjunto = nombreConjunto;
@@ -31,6 +27,12 @@ public class NodoConjunto extends Nodo {
     public String mostrarContenido() {
         return nombreConjunto;
     }
+    
+    @Override
+    public int contarNodos() {
+        return 1; // NodoConjunto es una hoja
+    }
+    
     @Override
     public String toString() {
         return nombreConjunto;
@@ -39,7 +41,7 @@ public class NodoConjunto extends Nodo {
     public String getNombreConjunto() {
         return nombreConjunto;
     }
-    
+
     @Override
     public void recopilarConjuntos(Set<String> conjuntos) {
         conjuntos.add(nombreConjunto);
@@ -56,5 +58,11 @@ public class NodoConjunto extends Nodo {
     @Override
     public int hashCode() {
         return nombreConjunto.hashCode();
+    }
+
+    @Override
+    public int calcularProfundidad() {
+        // Como NodoConjunto es una hoja, su profundidad es 0.
+        return 0;
     }
 }

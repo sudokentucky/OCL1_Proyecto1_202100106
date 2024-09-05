@@ -1,13 +1,13 @@
 package Arbol;
-
+/*
+ *
+ * @author Keneth Lopez
+ */
 import Conjuntos.GestorOperaciones;
-import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.util.Set;
-import math.geom2d.Point2D;
+
 
 public class NodoBinario extends Nodo {
     private String operador;
@@ -64,6 +64,17 @@ public class NodoBinario extends Nodo {
 
     public String getOperador() {
         return operador;
+    }
+    
+        @Override
+    public int calcularProfundidad() {
+        // Calcular la profundidad del nodo binario como el máximo entre sus hijos
+        return 1 + Math.max(izquierdo.calcularProfundidad(), derecho.calcularProfundidad());
+    }
+    
+    @Override
+    public int contarNodos() {
+        return 1 + izquierdo.contarNodos() + derecho.contarNodos();
     }
 
     public Nodo getIzquierdo() {

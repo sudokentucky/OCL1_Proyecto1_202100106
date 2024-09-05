@@ -1,12 +1,10 @@
 package Arbol;
-
+/**
+ *
+ * @author Keneth Lopez
+ */
 import Conjuntos.GestorOperaciones;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
 import java.util.Set;
-import math.geom2d.Point2D;
 
 public class NodoUnario extends Nodo {
     private String operador;
@@ -59,6 +57,16 @@ public class NodoUnario extends Nodo {
     
     public void setOperand(Nodo operand) {
         this.operand = operand;
+    }
+    
+    @Override
+    public int contarNodos() {
+        return 1 + operand.contarNodos();
+    }
+    @Override
+    public int calcularProfundidad() {
+        // Calcular la profundidad del nodo unario como la de su único hijo más uno
+        return 1 + operand.calcularProfundidad();
     }
 
     public Nodo getOperand() {
