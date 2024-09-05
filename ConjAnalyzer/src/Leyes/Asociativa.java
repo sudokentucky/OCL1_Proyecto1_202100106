@@ -5,7 +5,7 @@ import Arbol.NodoBinario;
 import java.util.List;
 
 /**
- *
+ * Clase para aplicar la ley asociativa en nodos binarios.
  * @author Keneth Lopez
  */
 public class Asociativa implements Ley {
@@ -17,43 +17,43 @@ public class Asociativa implements Ley {
         }
 
         NodoBinario operacion = (NodoBinario) nodo;
-        return (operacion.getOperador().equals("U") && esAsociativaUnion(operacion)) || 
-               (operacion.getOperador().equals("&") && esAsociativaInterseccion(operacion));
+        String operador = operacion.getOperador();
+
+        return (operador.equals("U") && esOperadorAsociativo(operacion, "U")) || 
+               (operador.equals("&") && esOperadorAsociativo(operacion, "&"));
     }
 
     @Override
     public Nodo aplicar(Nodo nodo, List<String> leyesAplicadas) {
-        // Verificar que el nodo es de tipo NodoBinario
         if (!(nodo instanceof NodoBinario)) {
             return nodo;
         }
 
         NodoBinario operacion = (NodoBinario) nodo;
-        Nodo izquierdo = operacion.getIzquierdo();
-        Nodo derecho = operacion.getDerecho();
+        String operador = operacion.getOperador();
 
-        if (esAsociativaUnion(operacion)) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
+        if (operador.equals("U") && esOperadorAsociativo(operacion, "U")) {
             leyesAplicadas.add("propiedad asociativa");
-            return new NodoBinario("U", new NodoBinario("U", izquierdo, derechoOperacion.getIzquierdo()), derechoOperacion.getDerecho());
+            return aplicarLeyAsociativa(operacion, "U");
         }
 
-        if (esAsociativaInterseccion(operacion)) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
+        if (operador.equals("&") && esOperadorAsociativo(operacion, "&")) {
             leyesAplicadas.add("propiedad asociativa");
-            return new NodoBinario("&", new NodoBinario("&", izquierdo, derechoOperacion.getIzquierdo()), derechoOperacion.getDerecho());
+            return aplicarLeyAsociativa(operacion, "&");
         }
 
         return operacion;
     }
 
-    private boolean esAsociativaUnion(NodoBinario operacion) {
-        Nodo derecho = operacion.getDerecho();
-        return derecho instanceof NodoBinario && ((NodoBinario) derecho).getOperador().equals("U");
+    private Nodo aplicarLeyAsociativa(NodoBinario operacion, String operador) {
+        Nodo izquierdo = operacion.getIzquierdo();
+        NodoBinario derecho = (NodoBinario) operacion.getDerecho();
+        
+        return new NodoBinario(operador, new NodoBinario(operador, izquierdo, derecho.getIzquierdo()), derecho.getDerecho());
     }
 
-    private boolean esAsociativaInterseccion(NodoBinario operacion) {
+    private boolean esOperadorAsociativo(NodoBinario operacion, String operadorEsperado) {
         Nodo derecho = operacion.getDerecho();
-        return derecho instanceof NodoBinario && ((NodoBinario) derecho).getOperador().equals("&");
+        return derecho instanceof NodoBinario && ((NodoBinario) derecho).getOperador().equals(operadorEsperado);
     }
 }

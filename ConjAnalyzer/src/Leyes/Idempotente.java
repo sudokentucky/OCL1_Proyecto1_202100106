@@ -14,32 +14,40 @@ public class Idempotente implements Ley {
 
     @Override
     public boolean esAplicable(Nodo nodo) {
-        if (!(nodo instanceof NodoBinario)) {
-            return false;
-        }
-
-        NodoBinario operacion = (NodoBinario) nodo;
-        return (operacion.getOperador().equals("U") || operacion.getOperador().equals("&")) && 
-               operacion.getIzquierdo().equals(operacion.getDerecho());
+        return esOperacionIdempotente(nodo);
     }
 
     @Override
     public Nodo aplicar(Nodo nodo, List<String> leyesAplicadas) {
-        // Verificar que el nodo es de tipo NodoBinario
-        if (!(nodo instanceof NodoBinario)) {
+        if (!esOperacionIdempotente(nodo)) {
             return nodo;
         }
 
         NodoBinario operacion = (NodoBinario) nodo;
         Nodo izquierdo = operacion.getIzquierdo();
-        Nodo derecho = operacion.getDerecho();
+        
+        leyesAplicadas.add("propiedad idempotente");
+        return izquierdo;
+    }
 
-        // Aplicar la ley idempotente: A ∪ A = A y A ∩ A = A
-        if (izquierdo.equals(derecho)) {
-            leyesAplicadas.add("propiedad idempotente");
-            return izquierdo;
+    /**
+     * Verifica si una operación binaria es idempotente.
+     * Una operación es idempotente si es un NodoBinario con operador 'U' o '&'
+     * y ambos operandos son iguales.
+     *
+     * @param nodo El nodo a verificar.
+     * @return true si la operación es idempotente, false en caso contrario.
+     */
+    private boolean esOperacionIdempotente(Nodo nodo) {
+        if (!(nodo instanceof NodoBinario)) {
+            return false;
         }
 
-        return operacion;
+        NodoBinario operacion = (NodoBinario) nodo;
+        Nodo izquierdo = operacion.getIzquierdo();
+        Nodo derecho = operacion.getDerecho();
+        
+        return (operacion.getOperador().equals("U") || operacion.getOperador().equals("&")) &&
+                izquierdo.equals(derecho);
     }
 }

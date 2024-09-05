@@ -11,7 +11,6 @@ import java.util.List;
  * - A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)
  * 
  * Esta clase verifica si se puede aplicar la ley distributiva a un nodo y la aplica si es posible.
- * 
  */
 public class Distributiva implements Ley {
 
@@ -23,36 +22,49 @@ public class Distributiva implements Ley {
 
         NodoBinario operacion = (NodoBinario) nodo;
         Nodo derecho = operacion.getDerecho();
-        return (operacion.getOperador().equals("U") && derecho instanceof NodoBinario && ((NodoBinario) derecho).getOperador().equals("&")) ||
-               (operacion.getOperador().equals("&") && derecho instanceof NodoBinario && ((NodoBinario) derecho).getOperador().equals("U"));
+
+        return esOperadorDistribuible(operacion.getOperador(), derecho);
     }
 
     @Override
     public Nodo aplicar(Nodo nodo, List<String> leyesAplicadas) {
-        // Verificar que el nodo es de tipo NodoBinario
         if (!(nodo instanceof NodoBinario)) {
             return nodo;
         }
 
         NodoBinario operacion = (NodoBinario) nodo;
-        Nodo izquierdo = operacion.getIzquierdo();
         Nodo derecho = operacion.getDerecho();
 
-        if (operacion.getOperador().equals("U") && derecho instanceof NodoBinario) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
+        if (esOperadorDistribuible(operacion.getOperador(), derecho)) {
             leyesAplicadas.add("propiedad distributiva");
+            return aplicarLeyDistributiva(operacion);
+        }
 
-            // Aplicar la ley distributiva: A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)
+        return operacion;
+    }
+
+    private boolean esOperadorDistribuible(String operador, Nodo derecho) {
+        if (!(derecho instanceof NodoBinario)) {
+            return false;
+        }
+
+        NodoBinario derechoBinario = (NodoBinario) derecho;
+        return (operador.equals("U") && derechoBinario.getOperador().equals("&")) ||
+               (operador.equals("&") && derechoBinario.getOperador().equals("U"));
+    }
+
+    private Nodo aplicarLeyDistributiva(NodoBinario operacion) {
+        String operador = operacion.getOperador();
+        Nodo izquierdo = operacion.getIzquierdo();
+        NodoBinario derechoOperacion = (NodoBinario) operacion.getDerecho();
+
+        if (operador.equals("U")) {
+            // A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)
             return new NodoBinario("&", 
                     new NodoBinario("U", izquierdo, derechoOperacion.getIzquierdo()), 
                     new NodoBinario("U", izquierdo, derechoOperacion.getDerecho()));
-        }
-
-        if (operacion.getOperador().equals("&") && derecho instanceof NodoBinario) {
-            NodoBinario derechoOperacion = (NodoBinario) derecho;
-            leyesAplicadas.add("propiedad distributiva");
-
-            // Aplicar la ley distributiva: A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)
+        } else if (operador.equals("&")) {
+            // A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)
             return new NodoBinario("U", 
                     new NodoBinario("&", izquierdo, derechoOperacion.getIzquierdo()), 
                     new NodoBinario("&", izquierdo, derechoOperacion.getDerecho()));

@@ -5,7 +5,7 @@ import Arbol.NodoBinario;
 import java.util.List;
 
 /**
- *
+ * Clase para aplicar la ley de absorción en nodos binarios.
  * @author Keneth Lopez
  */
 public class Absorcion implements Ley {
@@ -17,38 +17,56 @@ public class Absorcion implements Ley {
         }
 
         NodoBinario operacion = (NodoBinario) nodo;
-        return (operacion.getOperador().equals("U") && (esPropiedadDeAbsorcion(operacion.getIzquierdo(), operacion.getDerecho()) || esPropiedadDeAbsorcion(operacion.getDerecho(), operacion.getIzquierdo()))) ||
-               (operacion.getOperador().equals("&") && (esPropiedadDeAbsorcion(operacion.getIzquierdo(), operacion.getDerecho()) || esPropiedadDeAbsorcion(operacion.getDerecho(), operacion.getIzquierdo())));
+        String operador = operacion.getOperador();
+
+        if (operador.equals("U") || operador.equals("&")) {
+            return verificarPropiedadDeAbsorcion(operacion.getIzquierdo(), operacion.getDerecho()) ||
+                   verificarPropiedadDeAbsorcion(operacion.getDerecho(), operacion.getIzquierdo());
+        }
+
+        return false;
     }
 
     @Override
     public Nodo aplicar(Nodo nodo, List<String> leyesAplicadas) {
-        // Verificar que el nodo es de tipo NodoBinario
+        if (nodo == null || leyesAplicadas == null) {
+            throw new IllegalArgumentException("Nodo y leyesAplicadas no pueden ser nulos");
+        }
+
         if (!(nodo instanceof NodoBinario)) {
             return nodo;
         }
 
         NodoBinario operacion = (NodoBinario) nodo;
+
+        Nodo resultado = aplicarAbsorcion(operacion, leyesAplicadas);
+        return resultado != null ? resultado : operacion;
+    }
+
+    private Nodo aplicarAbsorcion(NodoBinario operacion, List<String> leyesAplicadas) {
         Nodo izquierdo = operacion.getIzquierdo();
         Nodo derecho = operacion.getDerecho();
 
-        if (esPropiedadDeAbsorcion(izquierdo, derecho)) {
+        if (verificarPropiedadDeAbsorcion(izquierdo, derecho)) {
             leyesAplicadas.add("propiedad de absorción");
             return izquierdo;
-        } else if (esPropiedadDeAbsorcion(derecho, izquierdo)) {
+        } else if (verificarPropiedadDeAbsorcion(derecho, izquierdo)) {
             leyesAplicadas.add("propiedad de absorción");
             return derecho;
         }
 
-        return operacion;
+        return null;
     }
 
-    private boolean esPropiedadDeAbsorcion(Nodo posibleAbsorbedor, Nodo posibleAbsorcion) {
-        if (posibleAbsorcion instanceof NodoBinario) {
-            NodoBinario nodoBinario = (NodoBinario) posibleAbsorcion;
-            return (nodoBinario.getOperador().equals("&") && (nodoBinario.getIzquierdo().equals(posibleAbsorbedor) || nodoBinario.getDerecho().equals(posibleAbsorbedor))) ||
-                   (nodoBinario.getOperador().equals("U") && (nodoBinario.getIzquierdo().equals(posibleAbsorbedor) || nodoBinario.getDerecho().equals(posibleAbsorbedor)));
+    private boolean verificarPropiedadDeAbsorcion(Nodo posibleAbsorbedor, Nodo posibleAbsorcion) {
+        if (!(posibleAbsorcion instanceof NodoBinario)) {
+            return false;
         }
-        return false;
+
+        NodoBinario nodoBinario = (NodoBinario) posibleAbsorcion;
+        String operador = nodoBinario.getOperador();
+
+        return (operador.equals("&") || operador.equals("U")) &&
+               (nodoBinario.getIzquierdo().equals(posibleAbsorbedor) || nodoBinario.getDerecho().equals(posibleAbsorbedor));
     }
 }

@@ -5,24 +5,18 @@ import Arbol.NodoBinario;
 import java.util.List;
 
 /**
- *
+ * Clase para aplicar la ley conmutativa en nodos binarios.
  * @author Keneth Lopez
  */
 public class Conmutativa implements Ley {
 
     @Override
     public boolean esAplicable(Nodo nodo) {
-        if (!(nodo instanceof NodoBinario)) {
-            return false;
-        }
-
-        NodoBinario operacion = (NodoBinario) nodo;
-        return operacion.getOperador().equals("U") || operacion.getOperador().equals("&");
+        return nodo instanceof NodoBinario && esOperadorConmutativo(((NodoBinario) nodo).getOperador());
     }
 
     @Override
     public Nodo aplicar(Nodo nodo, List<String> leyesAplicadas) {
-        // Verificar que el nodo es de tipo NodoBinario
         if (!(nodo instanceof NodoBinario)) {
             return nodo;
         }
@@ -31,12 +25,26 @@ public class Conmutativa implements Ley {
         Nodo izquierdo = operacion.getIzquierdo();
         Nodo derecho = operacion.getDerecho();
 
+        // Verificar que los nodos izquierdo y derecho no sean nulos
+        if (izquierdo == null || derecho == null) {
+            return operacion;  // No se puede aplicar la conmutativa si uno de los nodos es nulo
+        }
+
         // Aplicar la propiedad conmutativa si es aplicable
-        if (izquierdo.toString().compareTo(derecho.toString()) > 0) {
+        if (debeAplicarConmutativa(izquierdo, derecho)) {
             leyesAplicadas.add("propiedad conmutativa");
             return new NodoBinario(operacion.getOperador(), derecho, izquierdo);
         }
 
         return operacion;
+    }
+
+    private boolean esOperadorConmutativo(String operador) {
+        return "U".equals(operador) || "&".equals(operador);
+    }
+
+    private boolean debeAplicarConmutativa(Nodo izquierdo, Nodo derecho) {
+        // Se utiliza compareTo para decidir si se aplica la propiedad conmutativa
+        return izquierdo.toString().compareTo(derecho.toString()) > 0;
     }
 }
