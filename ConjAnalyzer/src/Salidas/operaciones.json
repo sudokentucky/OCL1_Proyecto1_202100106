@@ -1,0 +1,13 @@
+{
+    "op2": {
+        "leyes": ["propiedad de absorción"],
+        "conjunto simplificado": "(cA - cB)"
+    },
+    "op1": {
+        "leyes": [
+            "ley del doble complemento",
+            "propiedad idempotente"
+        ],
+        "conjunto simplificado": "(cA U cB)"
+    }
+}
