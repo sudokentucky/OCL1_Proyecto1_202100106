@@ -413,7 +413,7 @@ public class Inicio extends javax.swing.JFrame {
         // Guardar Reportes
         if (parser != null) {
             generarYGuardarReportesParser(parser);
-            simplificador.generarJSON("./src/Salidas/operaciones.json"); // Generar JSON de Operaciones
+            simplificador.generarJSON("operaciones.json"); // Generar JSON de Operaciones
         } else {
             System.err.println("El parser no fue inicializado correctamente.");
         }
