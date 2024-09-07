@@ -84,6 +84,7 @@ public class Inicio extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         Archivo = new javax.swing.JMenu();
         NewFile = new javax.swing.JMenuItem();
+        OpenFile = new javax.swing.JMenuItem();
         save = new javax.swing.JMenuItem();
         saveAs = new javax.swing.JMenuItem();
         excecute = new javax.swing.JMenu();
@@ -94,11 +95,17 @@ public class Inicio extends javax.swing.JFrame {
         SyntaxErr = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("ConjAnalyzer - 202100106");
+        setBackground(new java.awt.Color(204, 255, 204));
+        setBounds(new java.awt.Rectangle(0, 0, 0, 0));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setForeground(new java.awt.Color(204, 255, 204));
 
         entrada.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
         entrada.setText("Entrada");
 
         Salida.setEditable(false);
+        Salida.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 102, 255)));
         jScrollPane1.setViewportView(Salida);
 
         entrada1.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
@@ -106,8 +113,10 @@ public class Inicio extends javax.swing.JFrame {
 
         TextoEnrada.setColumns(20);
         TextoEnrada.setRows(5);
+        TextoEnrada.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 153, 255)));
         jScrollPane4.setViewportView(TextoEnrada);
 
+        JpanelGraph.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 102, 255)));
         JpanelGraph.setAlignmentX(0.7F);
         JpanelGraph.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
@@ -130,6 +139,7 @@ public class Inicio extends javax.swing.JFrame {
         entrada2.setText("Graficas");
 
         previousButton.setText("Anterior");
+        previousButton.setBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(102, 255, 255), new java.awt.Color(153, 153, 153)));
         previousButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 previousButtonActionPerformed(evt);
@@ -137,6 +147,7 @@ public class Inicio extends javax.swing.JFrame {
         });
 
         nextButton.setText("Siguiente");
+        nextButton.setBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(153, 255, 255), new java.awt.Color(153, 153, 153)));
         nextButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 nextButtonActionPerformed(evt);
@@ -144,6 +155,11 @@ public class Inicio extends javax.swing.JFrame {
         });
 
         Archivo.setText("Archivo");
+        Archivo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ArchivoActionPerformed(evt);
+            }
+        });
 
         NewFile.setText("Nuevo Archivo");
         NewFile.addActionListener(new java.awt.event.ActionListener() {
@@ -152,6 +168,14 @@ public class Inicio extends javax.swing.JFrame {
             }
         });
         Archivo.add(NewFile);
+
+        OpenFile.setText("Abrir Archivo");
+        OpenFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                OpenFileActionPerformed(evt);
+            }
+        });
+        Archivo.add(OpenFile);
 
         save.setText("Guardar");
         save.addActionListener(new java.awt.event.ActionListener() {
@@ -241,17 +265,17 @@ public class Inicio extends javax.swing.JFrame {
                             .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 528, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(130, 130, 130)
-                                .addComponent(previousButton)
-                                .addGap(99, 99, 99)
-                                .addComponent(nextButton))
+                                .addGap(121, 121, 121)
+                                .addComponent(previousButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(102, 102, 102)
+                                .addComponent(nextButton, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(37, 37, 37)
                                 .addComponent(JpanelGraph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(127, 127, 127)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 859, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(69, Short.MAX_VALUE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -266,8 +290,8 @@ public class Inicio extends javax.swing.JFrame {
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
                 .addGap(29, 29, 29)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(previousButton)
-                    .addComponent(nextButton))
+                    .addComponent(previousButton, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nextButton, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
                 .addComponent(entrada1)
                 .addGap(18, 18, 18)
@@ -569,9 +593,14 @@ public class Inicio extends javax.swing.JFrame {
 
     private void previousButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousButtonActionPerformed
         // TODO add your handling code here:
-        // Verificar si hay operaciones y si no estamos en la primera operación
-            if (arbolesExpresion != null && currentOperationIndex > 0) {
-            currentOperationIndex--;
+        // Verificar si hay árboles de expresión en la lista
+        if (arbolesExpresion != null && !arbolesExpresion.isEmpty()) {
+            // Si estamos en el primer árbol, mover al último
+            if (currentOperationIndex == 0) {
+                currentOperationIndex = arbolesExpresion.size() - 1;
+            } else {
+                currentOperationIndex--;
+            }
             System.out.println("Navegando a árbol de expresión anterior: índice " + currentOperationIndex);
             updateVennDiagramPanel(); // Llama al método para actualizar el panel
         }
@@ -579,13 +608,55 @@ public class Inicio extends javax.swing.JFrame {
 
     private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
         // TODO add your handling code here:
-        // Verificar si hay árboles y si no estamos en el último árbol
-        if (arbolesExpresion != null && currentOperationIndex < arbolesExpresion.size() - 1) {
-            currentOperationIndex++;
+           // Verificar si hay árboles de expresión en la lista
+        if (arbolesExpresion != null && !arbolesExpresion.isEmpty()) {
+            // Si estamos en el último árbol, mover al primero
+            if (currentOperationIndex == arbolesExpresion.size() - 1) {
+                currentOperationIndex = 0;
+            } else {
+                currentOperationIndex++;
+            }
             System.out.println("Navegando a siguiente árbol de expresión: índice " + currentOperationIndex);
             updateVennDiagramPanel(); // Llama al método para actualizar el panel
         }
     }//GEN-LAST:event_nextButtonActionPerformed
+
+    private void ArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ArchivoActionPerformed
+
+    }//GEN-LAST:event_ArchivoActionPerformed
+
+    private void OpenFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenFileActionPerformed
+        // TODO add your handling code here:
+                // TODO add your handling code here:
+            JFileChooser fileChooser = new JFileChooser();
+    
+    // Filtro para asegurarse de que solo se seleccionen archivos con extensión .ca
+    FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos CA (.ca)", "ca");
+    fileChooser.setFileFilter(filter);
+    
+    int result = fileChooser.showOpenDialog(this);
+    
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        
+        // Verificar que el archivo seleccionado sea válido y tenga la extensión correcta
+        if (selectedFile.getName().endsWith(".ca")) {
+            try {
+                // Leer el contenido del archivo
+                String content = new String(java.nio.file.Files.readAllBytes(selectedFile.toPath()));
+                
+                // Establecer el contenido del archivo en el área de texto
+                TextoEnrada.setText(content);
+                
+                JOptionPane.showMessageDialog(this, "Archivo cargado exitosamente", "Cargar Archivo", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error al leer el archivo: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Seleccione un archivo con extensión .ca", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    }//GEN-LAST:event_OpenFileActionPerformed
 
     private void abrirReporte(String filePath) {
         try {
@@ -638,6 +709,7 @@ public class Inicio extends javax.swing.JFrame {
     private javax.swing.JPanel JpanelGraph;
     private javax.swing.JMenuItem LexerErr;
     private javax.swing.JMenuItem NewFile;
+    private javax.swing.JMenuItem OpenFile;
     private javax.swing.JMenu Reportes;
     private javax.swing.JTextPane Salida;
     private javax.swing.JMenuItem SyntaxErr;
